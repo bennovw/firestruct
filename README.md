@@ -17,6 +17,10 @@ You can re-use your models, maintain strong Go type safety, and other Go librari
 See the [examples](https://github.com/bennovw/firestruct/tree/main/examples) folder for all examples.
 
 ```go
+import (
+	"github.com/bennovw/firestruct"
+)
+
 type MyStruct struct {
 	SomeTime   time.Time      `firestore:"timeData"`
 	Title      string         `firestore:"stringData"`
@@ -65,6 +69,10 @@ func MyCloudFunction(ctx context.Context, e event.Event) error {
 ## Advanced Usage
 For advanced use cases, the package provides helper functions to unwrap Firestore protojson tags from any map[string]interface{} or populate a struct using any type of source data.
 ```go
+import (
+	"github.com/bennovw/firestruct"
+)
+
 func MyCloudFunction(ctx context.Context, e event.Event) error {
 	cloudEvent := firestruct.FirestoreCloudEvent{}
 	err := json.Unmarshal(e.DataEncoded, &cloudEvent)
