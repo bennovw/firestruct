@@ -2,6 +2,7 @@
 [![GoDoc](https://img.shields.io/badge/pkg.go.dev-doc-blue)](http://pkg.go.dev/github.com/bennovw/firestruct)
 [![codecov](https://codecov.io/gh/bennovw/firestruct/branch/master/graph/badge.svg)](https://codecov.io/gh/bennovw/firestruct)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bennovw/firestruct)](https://goreportcard.com/report/github.com/bennovw/firestruct)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbennovw%2Ffirestruct.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbennovw%2Ffirestruct?ref=badge_shield)
 
 This package removes Firestore protojson tags and populates Go structs.
 
