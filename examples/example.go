@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"firestruct"
+	"github.com/bennovw/firestruct"
 	"fmt"
 	"time"
 

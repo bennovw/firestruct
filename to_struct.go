@@ -29,7 +29,7 @@ import (
 	ts "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
 
-	"firestruct/internal/fields"
+	"github.com/bennovw/firestruct/internal/fields"
 
 	"google.golang.org/genproto/googleapis/type/latlng"
 )

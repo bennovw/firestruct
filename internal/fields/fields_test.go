@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"firestruct/internal/testutil"
+	"github.com/bennovw/firestruct/internal/testutil"
 )
 
 type embed1 struct {

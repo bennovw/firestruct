@@ -4,8 +4,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/bennovw/firestruct/internal/testutil"
+
 	"github.com/davecgh/go-spew/spew"
-	"firestruct/internal/testutil"
 )
 
 type UnwrappedTableTest struct {
@@ -13,7 +14,6 @@ type UnwrappedTableTest struct {
 	Input    map[string]any
 	Expected map[string]any
 }
-
 
 var firestoreUnwrapTests = []UnwrappedTableTest{
 	{

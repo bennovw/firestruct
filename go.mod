@@ -1,4 +1,4 @@
-module firestruct
+module github.com/bennovw/firestruct
 
 go 1.20
 
