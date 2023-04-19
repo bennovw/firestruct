@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"firestruct/internal/testutil"
+	"github.com/bennovw/firestruct/internal/testutil"
 
 	"github.com/davecgh/go-spew/spew"
 )
