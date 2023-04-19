@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/bennovw/firestruct"
 	"fmt"
 	"time"
+
+	"github.com/bennovw/firestruct"
 
 	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/davecgh/go-spew/spew"

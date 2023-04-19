@@ -8,14 +8,14 @@ import (
 )
 
 type TestDocSimple struct {
-	TimeData   time.Time
-	StringData string
-	UUIDData   uuid.UUID
-	BoolData   bool
-	IntData    int
-	DoubleData float64
-	BytesData  []byte
-	NilData    any
+	TimeData      time.Time
+	StringData    string
+	UUIDData      uuid.UUID
+	BoolData      bool
+	IntData       int
+	DoubleData    float64
+	BytesData     []byte
+	NilData       any
 	GeoPointData  latlng.LatLng
 	NestedMapData map[string]any
 }
