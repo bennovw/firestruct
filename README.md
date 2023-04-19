@@ -9,7 +9,7 @@ This package removes Firestore protojson tags and populates Go structs.
 The package can be used by cloud functions to handle Firestore Cloud Events containing encoded Firestore documents.
 
 ## Why Should You Use It
-Firestore Cloud Events contain JSON encoded Firestore documents. The encoded Firestore document fields are all wrapped by protojson type descriptor tags. These tags are not needed when handling Cloud Events, and make it harder to work with Firestore data in Go cloud functions. This package can remove the Firestore protojson tags and populate Go structs using native Go types. As a result, you can easily re-use your existing models in your cloud functions.
+Firestore Cloud Events contain JSON encoded Firestore documents. Every field in the Firestore document comes wrapped by protojson type descriptor tags that are unnecessary when using Go. This package simplifies tagged Firestore data by unwrapping documents into a map or a pointer to Go struct. In other words, goodbye type assertions! All models used to create Firestore documents can now be re-used to receive documents embedded in Firestore Cloud Events, strong type safety is maintained, and your data is ready to be consumed by other Go libraries (e.g. to perform data validation).
 
 ## Simple Usage
 See the [examples](https://github.com/bennovw/firestruct/tree/main/examples) folder for all examples.
