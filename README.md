@@ -4,16 +4,16 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/bennovw/firestruct)](https://goreportcard.com/report/github.com/bennovw/firestruct)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbennovw%2Ffirestruct.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbennovw%2Ffirestruct?ref=badge_shield)
 
-This package removes Firestore protojson tags and populates Go structs.
+This package flattens and unmarshals protojson encoded Firestore documents contained in Cloud Events into a native Go map[string]interface{} or struct (without Firestore protojson tags)
 
-The package can be used by cloud functions to handle Firestore Cloud Events containing encoded Firestore documents.
+The package is ideal for cloud functions that are triggered by Cloud Events when you need simplified and easy to use Go data structures.
 
 ## Why Should You Use It
 Firestore Cloud Events wrap document fields in protojson type descriptor tags that are difficult to parse in Go. This package simplifies Firestore data by unwrapping documents into a type safe map or struct. 
 
-You can re-use your models, maintain strong Go type safety, and other Go libraries can happily consume clean data.
+It allows you to re-use the native Go models used to create Firestore documents to also handle incoming cloud events, which in turn simplifies data processing or validation by other Go functions.
 
-## Simple Usage
+## Example Usage
 See the [examples](https://github.com/bennovw/firestruct/tree/main/examples) folder for all examples.
 
 ```go
@@ -21,19 +21,6 @@ import (
 	"github.com/bennovw/firestruct"
 )
 
-type MyStruct struct {
-	SomeTime   time.Time      `firestore:"timeData"`
-	Title      string         `firestore:"stringData"`
-	ID         uuid.UUID      `firestore:"uuidData"`
-	IsWild     bool           `firestore:"boolData"`
-	Age        int64          `firestore:"intData"`
-	Weight     float64        `firestore:"doubleData"`
-	Bytes      []byte         `firestore:"bytesData"`
-	WildNull   any            `firestore:"nilData"`
-	Place      latlng.LatLng  `firestore:"geoPointData"`
-	NestedData map[string]any `firestore:"nestedMapData"`
-}
-
 func MyCloudFunction(ctx context.Context, e event.Event) error {
 	cloudEvent := firestruct.FirestoreCloudEvent{}
 	err := json.Unmarshal(e.DataEncoded, &cloudEvent)
@@ -42,8 +29,14 @@ func MyCloudFunction(ctx context.Context, e event.Event) error {
 		return err
 	}
 
-    // DataTo() converts the Firestore document into a struct, using the struct tags to map the Firestore document fields to the struct fields.
-	// This method is available to both FirestoreDocument and FirestoreCloudEvent types.
+    // Extract and unwrap a protojson encoded Firestore document from a Cloud Event
+    // Outputs a flattened map[string]interface{} without Firestore protojson tags
+    m, err := cloudEvent.ToMap()
+	if err != nil {
+		fmt.Printf("Error converting firestore document to map: %s", err)
+	}
+
+    // Unwrap and unmarshal a protojson encoded Firestore document into a struct
 	x := MyStruct{}
 	err = cloudEvent.DataTo(&x)
 	if err != nil {
@@ -51,52 +44,53 @@ func MyCloudFunction(ctx context.Context, e event.Event) error {
 		return err
 	}
 
-	// Do something with x
-
-    // ToMap() removes any Firestore protojson tags by converting the Cloud Event to a map[string]interface{}
-	// This method is available to both FirestoreDocument and FirestoreCloudEvent types.
-    m, err := cloudEvent.ToMap()
-	if err != nil {
-		fmt.Printf("Error converting firestore document to map: %s", err)
-	}
-
-    // Do something with m
-
 	return nil
+}
+
+// Supports all Firestore data types, including nested maps and arrays,
+// Firestore struct tags are optional
+type MyStruct struct {
+    SomeTime   time.Time      `firestore:"timeData"`
+    Title      string         `firestore:"stringData"`
+    ID         uuid.UUID      `firestore:"uuidData"`
+    IsWild     bool           `firestore:"boolData"`
+    Age        int64          `firestore:"intData"`
+    Weight     float64        `firestore:"doubleData"`
+    Bytes      []byte         `firestore:"bytesData"`
+    WildNull   any            `firestore:"nilData"`
+    Place      latlng.LatLng  `firestore:"geoPointData"`
+    NestedData map[string]any `firestore:"nestedMapData"`
 }
 ```
 
-## Advanced Usage
-For advanced use cases, the package provides helper functions to unwrap Firestore protojson tags from any map[string]interface{} or populate a struct using any type of source data.
+## Advanced Example
+The package also provides two stand-alone functions to flatten a subset of Firestore data into a map[string]interface{} or unmarshal data directly into a struct without having to rely on type assertions or json.Marshal followed by json.Unmarshal
 ```go
 import (
 	"github.com/bennovw/firestruct"
 )
 
 func MyCloudFunction(ctx context.Context, e event.Event) error {
-	cloudEvent := firestruct.FirestoreCloudEvent{}
-	err := json.Unmarshal(e.DataEncoded, &cloudEvent)
-	if err != nil {
-		fmt.Printf("Error unmarshalling firestore cloud event: %s", err)
-		return err
-	}
+    cloudEvent := firestruct.FirestoreCloudEvent{}
+    err := json.Unmarshal(e.DataEncoded, &cloudEvent)
+    if err != nil {
+        fmt.Printf("Error unmarshalling firestore cloud event: %s", err)
+        return err
+    }
 
-	// For advanced use cases, UnwrapFirestoreFields() will remove any Firestore protojson tags form a map[string]interface{}
-	uf, err := firestruct.UnwrapFirestoreFields(cloudEvent.Value.Fields)
-	if err != nil {
-		fmt.Printf("Error unwrapping firestore data: %s", err)
-	}
-	
-    // Do something with uf
+    // Unwraps a protojson encoded Firestore document, outputs a flattened map[string]interface{}
+    uf, err := firestruct.UnwrapFirestoreFields(cloudEvent.Value.Fields)
+    if err != nil {
+        fmt.Printf("Error unwrapping firestore data: %s", err)
+    }
 
-	// For advanced use cases, DataTo() will populate a struct using any type of source data.
-	st := MyStruct{}
-	err = firestruct.DataTo(&st, uf)
-	if err != nil {
-		fmt.Printf("Error converting reflect.pointer to MyStruct: %s", err)
-	}
-	
-    // Do something with st
+    // Unmarshals a map[string]interface{} directly into a struct
+    st := MyStruct{}
+    err = firestruct.DataTo(&st, uf)
+    if err != nil {
+        fmt.Printf("Error converting reflect.pointer to MyStruct: %s", err)
+    }
+
     return nil
 }
 ```
