@@ -97,7 +97,6 @@ type FirestoreDocument struct {
 //
 // Only the fields actually present in the document are used to populate p. Other fields
 // of p are left unchanged.
-
 func (d *FirestoreDocument) DataTo(p interface{}) error {
 	// Remove Firestore protojson field tags from the document's fields.
 	flatDoc, err := d.ToMap()
