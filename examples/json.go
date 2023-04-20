@@ -1,5 +1,6 @@
 package main
 
+// This is just an example of the DataEncoded payload in a Cloud Event after a Firestore Document was created in a collection
 var firestoreCloudEventJSON = `{
 	"oldValue":{},
 	"value":{

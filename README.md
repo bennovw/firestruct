@@ -88,7 +88,7 @@ func MyCloudFunction(ctx context.Context, e event.Event) error {
     st := MyStruct{}
     err = firestruct.DataTo(&st, uf)
     if err != nil {
-        fmt.Printf("Error converting reflect.pointer to MyStruct: %s", err)
+        fmt.Printf("Error populating MyStruct: %s", err)
     }
 
     return nil
