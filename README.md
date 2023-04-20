@@ -18,33 +18,33 @@ See the [examples](https://github.com/bennovw/firestruct/tree/main/examples) fol
 
 ```go
 import (
-	"github.com/bennovw/firestruct"
+    "github.com/bennovw/firestruct"
 )
 
 func MyCloudFunction(ctx context.Context, e event.Event) error {
-	cloudEvent := firestruct.FirestoreCloudEvent{}
-	err := json.Unmarshal(e.DataEncoded, &cloudEvent)
-	if err != nil {
-		fmt.Printf("Error unmarshalling firestore cloud event: %s", err)
-		return err
-	}
+    cloudEvent := firestruct.FirestoreCloudEvent{}
+    err := json.Unmarshal(e.DataEncoded, &cloudEvent)
+    if err != nil {
+        fmt.Printf("Error unmarshalling firestore cloud event: %s", err)
+        return err
+    }
 
     // Extract and unwrap a protojson encoded Firestore document from a Cloud Event
     // Outputs a flattened map[string]interface{} without Firestore protojson tags
     m, err := cloudEvent.ToMap()
-	if err != nil {
-		fmt.Printf("Error converting firestore document to map: %s", err)
-	}
+    if err != nil {
+        fmt.Printf("Error converting firestore document to map: %s", err)
+    }
 
     // Unwrap and unmarshal a protojson encoded Firestore document into a struct
-	x := MyStruct{}
-	err = cloudEvent.DataTo(&x)
-	if err != nil {
-		fmt.Printf("Error converting firestore document to MyStruct: %s", err)
-		return err
-	}
+    x := MyStruct{}
+    err = cloudEvent.DataTo(&x)
+    if err != nil {
+        fmt.Printf("Error converting firestore document to MyStruct: %s", err)
+        return err
+    }
 
-	return nil
+    return nil
 }
 
 // Supports all Firestore data types, including nested maps and arrays,
@@ -67,7 +67,7 @@ type MyStruct struct {
 The package also provides two stand-alone functions to flatten a subset of Firestore data into a map[string]interface{} or unmarshal data directly into a struct without having to rely on type assertions or json.Marshal followed by json.Unmarshal
 ```go
 import (
-	"github.com/bennovw/firestruct"
+    "github.com/bennovw/firestruct"
 )
 
 func MyCloudFunction(ctx context.Context, e event.Event) error {
