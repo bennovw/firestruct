@@ -4,17 +4,20 @@
 [![Go Report Card](https://img.shields.io/badge/go%20report-A+-brightgreen.svg?style=flat)](https://goreportcard.com/report/github.com/bennovw/firestruct)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbennovw%2Ffirestruct.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbennovw%2Ffirestruct?ref=badge_shield)
 
-This package flattens and unmarshals protojson encoded Firestore documents contained in Cloud Events into a native Go map[string]interface{} or struct (without Firestore protojson tags)
+This package deserializes protojson encoded Firestore documents as found in Firestore Cloud Events into a native Go map[string]interface{} or struct (without any protojson tags).
 
-The package is ideal for cloud functions that are triggered by Cloud Events when you need simplified and easy to use Go data structures.
+## Why Should You Use This Package?
+This package is useful when you need to read incoming Firestore documents within a Google Cloud Function written in Go. As of writing, the official Firestore Go SDK is not compatible with Cloud Functions because it does not support Firestore triggers or Cloud Events. This unofficial Go SDK for Firestore Cloud Events implements the missing functionality.
 
-## Why Should You Use It
-Firestore Cloud Events wrap document fields in protojson type descriptor tags that are difficult to parse in Go. This package simplifies Firestore data by unwrapping documents into a type safe map or struct. 
+Google Cloud Functions can be triggered by events in Firestore (onCreate, onUpdate, onDelete, onWrite). The resulting http call to your cloud function includes the Firestore document in the http payload, but all the document's fields will be wrapped in protojson type descriptor tags. These tags makes parsing the document much more difficult than it needs to be. 
 
-It allows you to re-use the native Go models used to create Firestore documents to also handle incoming cloud events, which in turn simplifies data processing or validation by other Go functions.
+This package makes it trivial to unwrap the encoded Firestore data and unmarshal your Cloud Event into native Go data structures. You can simply re-use the same structs used to create Firestore documents to handle incoming cloud events. This in turn neatly simplifies your data processing and validation within your codebase.
 
-## Example Usage
-See the [examples](https://github.com/bennovw/firestruct/tree/main/examples) folder for all examples.
+## Installation
+```go get github.com/bennovw/firestruct```
+
+## Usage
+See the [examples](https://github.com/bennovw/firestruct/tree/main/examples) folder for more examples.
 
 ```go
 import (
