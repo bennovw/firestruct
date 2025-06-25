@@ -57,7 +57,7 @@ var (
 //	err := dataToReflectPointer(reflect.ValueOf(p).Elem(), map[string]interface{}{"Name": "John", "Age": 21})
 func dataToReflectPointer(p reflect.Value, data any) error {
 	typeErr := func() error {
-		return fmt.Errorf("firestruct: cannot use value %T to populate %s ", data, p.Type())
+		return fmt.Errorf("cannot use value %T to populate %s ", data, p.Type())
 	}
 
 	// A Null value sets anything nullable to nil, and has no effect
@@ -113,11 +113,11 @@ func dataToReflectPointer(p reflect.Value, data any) error {
 		case map[string]interface{}:
 			lat, ok := x["latitude"].(float64)
 			if !ok {
-				return errors.New("firestruct: latitude is not a float64")
+				return errors.New("latitude is not a float64")
 			}
 			lng, ok := x["longitude"].(float64)
 			if !ok {
-				return errors.New("firestruct: longitude is not a float64")
+				return errors.New("longitude is not a float64")
 			}
 			p.Set(reflect.ValueOf(latlng.LatLng{Latitude: lat, Longitude: lng}))
 			return nil
@@ -133,7 +133,7 @@ func dataToReflectPointer(p reflect.Value, data any) error {
 		}
 		uuid, err := uuid.Parse(x)
 		if err != nil {
-			return fmt.Errorf("firestruct: %v is not a valid UUID: %v", data, err)
+			return fmt.Errorf("%v is not a valid UUID: %v", data, err)
 
 		}
 		p.Set(reflect.ValueOf(uuid))
@@ -287,7 +287,7 @@ func dataToReflectPointer(p reflect.Value, data any) error {
 		fallthrough
 
 	default:
-		return fmt.Errorf("firestruct: cannot set type %s", p.Type())
+		return fmt.Errorf("cannot set type %s", p.Type())
 	}
 	return nil
 }
@@ -314,7 +314,7 @@ func populateArray(vr reflect.Value, vals []any, n int) error {
 func populateMap(vm reflect.Value, pm map[string]any) error {
 	t := vm.Type()
 	if t.Key().Kind() != reflect.String {
-		return errors.New("firestruct: map key type is not string")
+		return errors.New("map key type is not string")
 	}
 	if vm.IsNil() {
 		vm.Set(reflect.MakeMap(t))
@@ -373,7 +373,7 @@ func populateStruct(vs reflect.Value, data map[string]any) error {
 }
 
 func overflowErr(v reflect.Value, x interface{}) error {
-	return fmt.Errorf("firestruct: value %v overflows type %s", x, v.Type())
+	return fmt.Errorf("value %v overflows type %s", x, v.Type())
 }
 
 var fieldCache = fields.NewCache(parseTag, nil, isLeafType)

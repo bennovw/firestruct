@@ -15,29 +15,54 @@
 package firestruct
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"reflect"
+
+	"google.golang.org/genproto/googleapis/type/latlng"
+)
+
+var (
+	protoBytesTag     = "bytesValue"
+	protoMapTag       = "mapValue"
+	protoArrayTag     = "arrayValue"
+	protoNullTag      = "nullValue"
+	protoStringTag    = "stringValue"
+	protoBoolTag      = "booleanValue"
+	protoIntTag       = "integerValue"
+	protoDoubleTag    = "doubleValue"
+	protoTimestampTag = "timestampValue"
+	protoGeoPointTag  = "geoPointValue"
+	protoReferenceTag = "referenceValue"
 )
 
 // List of Firestore protojson tags without any nested data structures
 // For full listing of Firestore protojson tags, see https://firebase.google.com/docs/firestore/reference/rest/v1/Value
 var FirestoreFlatDataTypes = []string{
-	"stringValue",
-	"booleanValue",
-	"integerValue",
-	"doubleValue",
-	"timestampValue",
-	"nullValue",
-	"bytesValue",
-	"referenceValue",
-	"geoPointValue",
+	protoStringTag,
+	protoBoolTag,
+	protoReferenceTag,
+	protoTimestampTag,
+	protoNullTag,
+	protoIntTag,
+	protoDoubleTag,
+	protoBytesTag,
+	protoGeoPointTag,
+}
+
+var FirestoreSimpleDataTypes = []string{
+	protoStringTag,
+	protoBoolTag,
+	protoReferenceTag,
+	protoTimestampTag,
+	protoNullTag,
 }
 
 // UnwrapFirestoreFields unwraps a map[string]any containing one or more nested Firestore protojson encoded fields and returns a Go map[string]any without Firestore protojson tags.
 func UnwrapFirestoreFields(input map[string]any) (map[string]any, error) {
 	if input == nil {
-		return nil, errors.New("firestruct: nil map contents")
+		return nil, errors.New("nil map contents")
 	}
 
 	output := make(map[string]any, len(input))
@@ -48,12 +73,12 @@ func UnwrapFirestoreFields(input map[string]any) (map[string]any, error) {
 		vType := reflect.TypeOf(val)
 
 		if vType != mapType {
-			return nil, fmt.Errorf("firestruct: invalid input, expecting *map[string]any, but received %T", val)
+			return nil, fmt.Errorf("invalid input, expecting *map[string]any, but received %T", val)
 		}
 
 		// handle less common cases first
 		if len(input) == 1 {
-			if k == "mapValue" {
+			if k == protoMapTag {
 				// if the document only contains a single map without a title descriptor, we can return the map directly
 				x, err := unwrapMap(val)
 				if err != nil {
@@ -61,7 +86,7 @@ func UnwrapFirestoreFields(input map[string]any) (map[string]any, error) {
 				}
 
 				return x, nil
-			} else if k == "arrayValue" {
+			} else if k == protoArrayTag {
 				// when a document contains an array the immediate children won't have a title descriptor, so no need to unwrap the title
 				x, err := unwrapArray(val)
 				if err != nil {
@@ -76,7 +101,7 @@ func UnwrapFirestoreFields(input map[string]any) (map[string]any, error) {
 		// usually the top level of the input map is a title descriptor, we evaluate the protojson tags in the subvalues before unwrapping our data
 		for kk, vv := range val.(map[string]interface{}) {
 			// Process data types that don't contain nested data first
-			if kk != "mapValue" && kk != "arrayValue" {
+			if kk != protoMapTag && kk != protoArrayTag {
 				x, err := unwrapFlatValue(val)
 				if err != nil {
 					return nil, err
@@ -87,7 +112,7 @@ func UnwrapFirestoreFields(input map[string]any) (map[string]any, error) {
 			}
 
 			// recursively process maps
-			if kk == "mapValue" {
+			if kk == protoMapTag {
 				x, err := unwrapMap(vv)
 				if err != nil {
 					return nil, err
@@ -97,7 +122,7 @@ func UnwrapFirestoreFields(input map[string]any) (map[string]any, error) {
 			}
 
 			// recursively process arrays as slices
-			if kk == "arrayValue" {
+			if kk == protoArrayTag {
 				x, err := unwrapArray(vv)
 				if err != nil {
 					return nil, err
@@ -116,11 +141,31 @@ func UnwrapFirestoreFields(input map[string]any) (map[string]any, error) {
 func unwrapFlatValue(value any) (any, error) {
 	mapValue, ok := value.(map[string]interface{})
 	if !ok || len(mapValue) != 1 {
-		return nil, fmt.Errorf("firestruct: unwrapFlatValue error processing unsupported value: %v", value)
+		return nil, fmt.Errorf("unwrapFlatValue error processing unsupported value: %v", value)
 	}
 
-	for _, subkey := range FirestoreFlatDataTypes {
-		subValue, ok := mapValue[subkey]
+	// Check if the value in the payload is encoded, starting with bytes
+	if bytesValue, ok := mapValue[protoBytesTag]; ok {
+		return unwrapBytes(bytesValue)
+	}
+
+	// Ensure int values are converted from float64 to int
+	if intValue, ok := mapValue[protoIntTag]; ok {
+		return unwrapInt(intValue)
+	}
+
+	// Ensure float values without decimal point are converted from int to float64
+	if doubleValue, ok := mapValue[protoDoubleTag]; ok {
+		return unwrapDouble(doubleValue)
+	}
+
+	// Ensure geopoint values are converted from map[string]interface{} to GeoPoint
+	if geoPointValue, ok := mapValue[protoGeoPointTag]; ok {
+		return unwrapGeoPoint(geoPointValue)
+	}
+
+	for _, key := range FirestoreSimpleDataTypes {
+		subValue, ok := mapValue[key]
 		if !ok {
 			continue
 		}
@@ -128,14 +173,14 @@ func unwrapFlatValue(value any) (any, error) {
 		return subValue, nil
 	}
 
-	return nil, fmt.Errorf("firestruct: unwrapFlatValue error processing unsupported value: %v", value)
+	return nil, fmt.Errorf("unwrapFlatValue error processing unsupported value: %v", value)
 }
 
 // unwrapMap returns the values nested within a Firestore json encoded map
 func unwrapMap(value any) (map[string]any, error) {
 	m, ok := value.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("firestruct: unwrapMap error, Firestore map is expected to be a map[string]interface{} got: %T", value)
+		return nil, fmt.Errorf("unwrapMap error, Firestore map is expected to be a map[string]interface{} got: %T", value)
 	}
 	mf, ok := m["fields"]
 	if !ok {
@@ -144,11 +189,11 @@ func unwrapMap(value any) (map[string]any, error) {
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("firestruct: unwrapMap error, \"fields\" key not found")
+		return nil, fmt.Errorf("unwrapMap error, \"fields\" key not found")
 	}
 	mv, ok := mf.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("firestruct: unwrapMap erro, Firestore map fields are expected to be a map[string]interface{} got: %T", value)
+		return nil, fmt.Errorf("unwrapMap erro, Firestore map fields are expected to be a map[string]interface{} got: %T", value)
 	}
 
 	subValues, err := UnwrapFirestoreFields(mv)
@@ -162,7 +207,7 @@ func unwrapMap(value any) (map[string]any, error) {
 func unwrapArray(array any) ([]any, error) {
 	am, ok := array.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("firestruct: unwrapArray error, Firestore array is expected to be a map[string]interface{}")
+		return nil, fmt.Errorf("unwrapArray error, Firestore array is expected to be a map[string]interface{}")
 	}
 
 	v, ok := am["values"]
@@ -171,12 +216,12 @@ func unwrapArray(array any) ([]any, error) {
 		if len(am) == 0 {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("firestruct: unwrapArray error, \"values\" key not found")
+		return nil, fmt.Errorf("unwrapArray error, \"values\" key not found")
 	}
 
 	va, ok := v.([]any)
 	if !ok {
-		return nil, fmt.Errorf("firestruct: unwrapArray error, \"values\" does not contain an array of values")
+		return nil, fmt.Errorf("unwrapArray error, \"values\" does not contain an array of values")
 	}
 
 	// create new array and populate it with unwrapped subvalues
@@ -185,7 +230,7 @@ func unwrapArray(array any) ([]any, error) {
 	for i, val := range va {
 		mapVal, ok := val.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("firestruct: unwrapArray error, array can only contain values encoded as map[string]interface{}")
+			return nil, fmt.Errorf("unwrapArray error, array can only contain values encoded as map[string]interface{}")
 		}
 
 		output, err := UnwrapFirestoreFields(mapVal)
@@ -196,4 +241,83 @@ func unwrapArray(array any) ([]any, error) {
 	}
 
 	return outputArray, nil
+}
+
+// unwrapBytes decodes base64-encoded bytes from Firestore protojson
+func unwrapBytes(bytesValue any) ([]byte, error) {
+	if bytesValue == nil {
+		return nil, fmt.Errorf("unwrapBytes error: nil bytes value")
+	}
+
+	// If the bytesValue is already a byte slice, if so, return it directly
+	if bv, ok := bytesValue.([]byte); ok {
+		return bv, nil
+	}
+
+	// Check if the bytesValue is a string, which is how Firestore encodes bytes in protojson format
+	bv, ok := bytesValue.(string)
+	if ok {
+		decoded, err := base64.StdEncoding.DecodeString(bv)
+		if err != nil {
+			return nil, fmt.Errorf("unwrapBytes error decoding base64 bytes value: %v", err)
+		}
+		return decoded, nil
+	}
+
+	return nil, fmt.Errorf("unwrapBytes error processing bytes value: %v", bytesValue)
+}
+
+// unwrapInt converts integer values from float64
+func unwrapInt(intValue any) (int, error) {
+	if iv, ok := intValue.(float64); ok {
+		return int(iv), nil
+	}
+
+	if iv, ok := intValue.(int); ok {
+		return iv, nil
+	}
+
+	return 0, fmt.Errorf("unwrapInt error processing int value: %v", intValue)
+}
+
+// unwrapDouble converts double values from int to float64 if they are not already float64
+func unwrapDouble(doubleValue any) (float64, error) {
+	if dv, ok := doubleValue.(float64); ok {
+		return dv, nil
+	}
+
+	if dv, ok := doubleValue.(int); ok {
+		return float64(dv), nil
+	}
+
+	return 0, fmt.Errorf("unwrapDouble error processing double value: %v", doubleValue)
+}
+
+// unwrapGeoPoint converts geopoint values from map[string]interface{} to latlng.LatLng
+func unwrapGeoPoint(geoPointValue any) (latlng.LatLng, error) {
+	if geoPointValue == nil {
+		return latlng.LatLng{}, nil
+	}
+
+	// check if the geoPointValue is already a latlng.LatLng type, if so, return it directly
+	if gp, ok := geoPointValue.(latlng.LatLng); ok {
+		return gp, nil
+	}
+
+	gp, ok := geoPointValue.(map[string]interface{})
+	if !ok {
+		return latlng.LatLng{}, fmt.Errorf("unwrapGeoPoint error processing geoPoint value: %v", geoPointValue)
+	}
+
+	lat, ok := gp["latitude"].(float64)
+	if !ok {
+		return latlng.LatLng{}, fmt.Errorf("unwrapGeoPoint error processing geoPoint latitude value: %v", gp["latitude"])
+	}
+
+	lng, ok := gp["longitude"].(float64)
+	if !ok {
+		return latlng.LatLng{}, fmt.Errorf("unwrapGeoPoint error processing geoPoint longitude value: %v", gp["longitude"])
+	}
+
+	return latlng.LatLng{Latitude: lat, Longitude: lng}, nil
 }
