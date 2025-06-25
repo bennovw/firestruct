@@ -17,7 +17,10 @@ package testutil
 import (
 	"math"
 	"math/big"
+	"reflect"
+	"testing"
 
+	"github.com/fatih/structs"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/go-cmp/cmp"
 )
@@ -58,4 +61,35 @@ func Diff(x, y interface{}, opts ...cmp.Option) string {
 	// Put default options at the end. Order doesn't matter.
 	opts = append(opts[:len(opts):len(opts)], defaultCmpOptions...)
 	return cmp.Diff(x, y, opts...)
+}
+
+// IsDeepEqual performs both IsMapVersionDeepEqual and IsStringVersionDeepEqual checks
+func IsDeepEqual(t *testing.T, funcName string, testSectionName string, result interface{}, expected interface{}) {
+	IsMapVersionDeepEqual(t, funcName, testSectionName, result, expected)
+	IsStringVersionDeepEqual(t, funcName, testSectionName, result, expected)
+}
+
+// IsMapVersionDeepEqual checks if the result is equal to the expected result
+func IsMapVersionDeepEqual(t *testing.T, funcName string, testSectionName string, result interface{}, expected interface{}) {
+	// Convert to maps if not already maps
+	expectedMap := asMap(expected)
+	resultMap := asMap(result)
+
+	if !reflect.DeepEqual(resultMap, expectedMap) {
+		t.Errorf("%v() test \"%v\" Result: %v Want: %v", funcName, testSectionName, result, expected)
+		return
+	}
+}
+
+// asMap converts a value to a map representation.
+func asMap(v interface{}) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	t := reflect.TypeOf(v)
+	if t != nil && t.Kind() == reflect.Map {
+		return v
+	}
+	return structs.Map(v)
 }

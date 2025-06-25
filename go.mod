@@ -16,6 +16,7 @@ require (
 require (
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/davecgh/go-spew v1.1.1
+	github.com/fatih/structs v1.1.0
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.6.0
 	google.golang.org/protobuf v1.34.2 // indirect

@@ -1,7 +1,8 @@
 package testutil
 
 type TableTest struct {
-	Name     string
-	Input    interface{}
-	Expected interface{}
+	Name       string
+	TargetType string
+	Input      interface{}
+	Expected   interface{}
 }

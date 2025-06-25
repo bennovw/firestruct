@@ -5,66 +5,91 @@ import (
 	"testing"
 
 	"github.com/bennovw/firestruct/internal/testutil"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 var firestoreToStructTests = []testutil.TableTest{
 	{
-		Name:     "data to simple struct",
-		Input:    testutil.TestFirebaseDocs[12],
-		Expected: testutil.ResultStructs[0],
+		Name:       "data to simple struct",
+		TargetType: "SimpleStruct",
+		Input:      testutil.TestFirebaseDocFields[12],
+		Expected:   testutil.StructResults[0],
 	},
 	{
-		Name:     "data to tagged struct",
-		Input:    testutil.TestFirebaseDocs[12],
-		Expected: testutil.ResultStructs[1],
+		Name:       "data to tagged struct",
+		TargetType: "TaggedStruct",
+		Input:      testutil.TestFirebaseDocFields[12],
+		Expected:   testutil.StructResults[1],
 	},
 }
 
+func BenchmarkTestDataToReflectPointerSimple(b *testing.B) {
+	benchmarkName := "BenchmarkTestDataToReflectPointerSimple"
+	testStruct := firestoreToStructTests[0]
+	testData, err := UnwrapFirestoreFields(testStruct.Input.(map[string]interface{}))
+	if err != nil {
+		b.Errorf("%v() test \"%v\" returned error running UnwrapFirestoreFields(): %v", benchmarkName, testStruct.Name, err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		b.Run(benchmarkName, func(b *testing.B) {
+			result := testutil.TestSimpleStruct{}
+			_ = dataToReflectPointer(reflect.ValueOf(&result).Elem(), testData)
+		})
+	}
+}
+
+func BenchmarkTestDataToReflectPointerTagged(b *testing.B) {
+	benchmarkName := "BenchmarkTestDataToReflectPointerTagged"
+	testStruct := firestoreToStructTests[1]
+	testData, err := UnwrapFirestoreFields(testStruct.Input.(map[string]interface{}))
+	if err != nil {
+		b.Errorf("%v() test \"%v\" returned error running UnwrapFirestoreFields(): %v", benchmarkName, testStruct.Name, err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		b.Run(benchmarkName, func(b *testing.B) {
+			result := testutil.TestTaggedStruct{}
+			_ = dataToReflectPointer(reflect.ValueOf(&result).Elem(), testData)
+		})
+	}
+}
+
 func TestDataToReflectPointer(t *testing.T) {
-	testDocSimple := testutil.TestDocSimple{}
-	testDocTagged := testutil.TestDocTagged{}
+	thisFunctionName := "dataToReflectPointer"
 
 	for _, test := range firestoreToStructTests {
 		t.Run(test.Name, func(t *testing.T) {
-			x, ok := test.Input.(map[string]interface{})
+			testInput, ok := test.Input.(map[string]interface{})
 			if !ok {
-				t.Errorf("dataToReflectPointer() test \"%v\" test data invalid, Input1 is not a map[string]interface{}", test.Name)
+				t.Errorf("%v() test \"%v\" test data invalid, Input1 is not a map[string]interface{}", thisFunctionName, test.Name)
 			}
 
-			unwrapped, err := UnwrapFirestoreFields(x)
+			unwrapped, err := UnwrapFirestoreFields(testInput)
 			if err != nil {
-				t.Errorf("dataToReflectPointer() test \"%v\" returned error running UnwrapFirestoreFields(): %v", test.Name, err)
+				t.Errorf("%v() test \"%v\" returned error running UnwrapFirestoreFields(): %v", thisFunctionName, test.Name, err)
 			}
 
 			switch test.Expected.(type) {
-			case testutil.TestDocSimple:
-				err = dataToReflectPointer(reflect.ValueOf(&testDocSimple).Elem(), unwrapped)
+			case testutil.TestSimpleStruct:
+				result := testutil.TestSimpleStruct{}
+				err = dataToReflectPointer(reflect.ValueOf(&result).Elem(), unwrapped)
 				if err != nil {
-					t.Errorf("dataToReflectPointer() test \"%v\" returned error: %v", test.Name, err)
+					t.Errorf("%v() test \"%v\" returned error: %v", thisFunctionName, test.Name, err)
 				}
 
-				CheckResultEquality(t, test.Name, testDocSimple, test.Expected)
-			case testutil.TestDocTagged:
-				err = dataToReflectPointer(reflect.ValueOf(&testDocTagged).Elem(), unwrapped)
+				testutil.IsDeepEqual(t, thisFunctionName, test.Name, result, test.Expected)
+			case testutil.TestTaggedStruct:
+				result := testutil.TestTaggedStruct{}
+				err = dataToReflectPointer(reflect.ValueOf(&result).Elem(), unwrapped)
 				if err != nil {
-					t.Errorf("dataToReflectPointer() test \"%v\" returned error: %v", test.Name, err)
+					t.Errorf("%v() test \"%v\" returned error: %v", thisFunctionName, test.Name, err)
 				}
 
-				CheckResultEquality(t, test.Name, testDocTagged, test.Expected)
+				testutil.IsDeepEqual(t, thisFunctionName, test.Name, result, test.Expected)
 			default:
-				t.Errorf("dataToReflectPointer() test \"%v\" expected result data type is not covered", test.Name)
+				t.Errorf("%v() test \"%v\" expected result data type is not covered", thisFunctionName, test.Name)
 			}
 		})
 	}
 
-}
-
-// CheckResultEquality checks if the result is equal to the expected result
-func CheckResultEquality(t *testing.T, name string, result interface{}, expected interface{}) {
-	if !reflect.DeepEqual(result, expected) {
-		spew.Dump(result, expected)
-		t.Errorf("dataToReflectPointer() test \"%v\" Result: %v Want: %v", name, result, expected)
-	}
 }
