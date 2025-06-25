@@ -33,7 +33,7 @@ type tagOptions struct {
 func parseTag(t reflect.StructTag) (name string, keep bool, other interface{}, err error) {
 	name, keep, opts, err := fields.ParseStandardTag("firestore", t)
 	if err != nil {
-		return "", false, nil, fmt.Errorf("firestruct: %w", err)
+		return "", false, nil, err
 	}
 	tagOpts := tagOptions{}
 	for _, opt := range opts {
@@ -41,7 +41,7 @@ func parseTag(t reflect.StructTag) (name string, keep bool, other interface{}, e
 		case "omitempty":
 			tagOpts.omitEmpty = true
 		default:
-			return "", false, nil, fmt.Errorf("firestruct: unknown tag option: %q", opt)
+			return "", false, nil, fmt.Errorf("unknown tag option: %q", opt)
 		}
 	}
 	return name, keep, tagOpts, nil

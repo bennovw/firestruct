@@ -101,7 +101,7 @@ func (d *FirestoreDocument) DataTo(p interface{}) error {
 	// Remove Firestore protojson field tags from the document's fields.
 	flatDoc, err := d.ToMap()
 	if err != nil {
-		return fmt.Errorf("firestruct: error converting Firestore document to map %v", err)
+		return fmt.Errorf("error converting Firestore document to map %v", err)
 	}
 
 	return DataTo(p, flatDoc)
@@ -110,7 +110,7 @@ func (d *FirestoreDocument) DataTo(p interface{}) error {
 // ToMap converts a Firestore document to a native Go map[string]interface{} without protojson tags
 func (e *FirestoreDocument) ToMap() (map[string]any, error) {
 	if e == nil {
-		return nil, errors.New("firestruct: nil document contents")
+		return nil, errors.New("nil document contents")
 	}
 
 	fields, err := UnwrapFirestoreFields(e.Fields)
@@ -126,7 +126,7 @@ func (e *FirestoreDocument) ToMap() (map[string]any, error) {
 func DataTo(pointer interface{}, data any) error {
 	pv := reflect.ValueOf(pointer)
 	if pv.Kind() != reflect.Ptr || pv.IsNil() {
-		return errors.New("firestruct: target is nil or not a pointer to a struct or map")
+		return errors.New("target is nil or not a pointer to a struct or map")
 	}
 
 	// If p is a pointer to a map, populate it directly.
