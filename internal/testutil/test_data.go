@@ -7,7 +7,8 @@ import (
 	"google.golang.org/genproto/googleapis/type/latlng"
 )
 
-type TestDocSimple struct {
+// TestSimpleStruct is a struct used for testing. All the fields names match the Firestore field names
+type TestSimpleStruct struct {
 	TimeData      time.Time
 	StringData    string
 	UUIDData      uuid.UUID
@@ -17,10 +18,12 @@ type TestDocSimple struct {
 	BytesData     []byte
 	NilData       any
 	GeoPointData  latlng.LatLng
+	ReferenceData string
 	NestedMapData map[string]any
 }
 
-type TestDocTagged struct {
+// TestTaggedStruct is a struct used for testing. All the fields names do not match the Firestore field names and are tagged as a result
+type TestTaggedStruct struct {
 	Time      time.Time      `firestore:"timeData"`
 	String    string         `firestore:"stringData"`
 	UUID      uuid.UUID      `firestore:"uuidData"`
@@ -30,10 +33,30 @@ type TestDocTagged struct {
 	Bytes     []byte         `firestore:"bytesData"`
 	Nil       any            `firestore:"nilData"`
 	GeoPoint  latlng.LatLng  `firestore:"geoPointData"`
+	Ref       string         `firestore:"referenceData"`
 	NestedMap map[string]any `firestore:"nestedMapData"`
 }
 
+var TestFirebaseCloudEvents = []map[string]any{
+	// FirestoreCloudEvent with no updateMask
+	{
+		"oldValue":   map[string]any{},
+		"value":      TestFirebaseDocs[0],
+		"updateMask": map[string]any{},
+	},
+}
+
 var TestFirebaseDocs = []map[string]any{
+	// Firestore document with a complex map field
+	{
+		"name":       "projects/projectID/databases/(default)/documents/collection/document",
+		"fields":     TestFirebaseDocFields[12],
+		"createTime": "2025-04-14T01:02:03Z",
+		"updateTime": "2025-04-14T01:02:03Z",
+	},
+}
+
+var TestFirebaseDocFields = []map[string]any{
 	{
 		"timeData": map[string]any{
 			"timestampValue": "2025-04-14T01:02:03Z",
@@ -179,6 +202,8 @@ var TestFirebaseDocs = []map[string]any{
 			},
 		},
 	},
+	// Test document [12] is a complex document containing all possible data types
+	// it includes a nested map that contains an array containing both a map and another nested array
 	{
 		"timeData": map[string]any{
 			"timestampValue": "2025-04-14T01:02:03Z",
@@ -369,7 +394,7 @@ var TestFirebaseDocs = []map[string]any{
 	},
 }
 
-var ResultFirebaseDocs = []map[string]any{
+var FlattenedMapResults = []map[string]any{
 	{
 		"timeData": "2025-04-14T01:02:03Z",
 	},
@@ -525,17 +550,18 @@ var testTimestamp, _ = time.Parse(time.RFC3339, "2025-04-14T01:02:03Z")
 var testUUID, _ = uuid.Parse("1f117a40-8bdb-4e8a-8f24-1622fea695b1")
 var testLatLang = latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536}
 
-var ResultStructs = []any{
-	TestDocSimple{
-		TimeData:     testTimestamp,
-		StringData:   "Hello World",
-		UUIDData:     testUUID,
-		BoolData:     true,
-		IntData:      987654321,
-		DoubleData:   987.123456,
-		BytesData:    []byte("Hello World"),
-		NilData:      nil,
-		GeoPointData: testLatLang,
+var StructResults = []any{
+	TestSimpleStruct{
+		TimeData:      testTimestamp,
+		StringData:    "Hello World",
+		UUIDData:      testUUID,
+		BoolData:      true,
+		IntData:       987654321,
+		DoubleData:    987.123456,
+		BytesData:     []byte("Hello World"),
+		NilData:       nil,
+		GeoPointData:  testLatLang,
+		ReferenceData: "/reference/path",
 		NestedMapData: map[string]any{
 			"nestedArrayData": []any{
 				map[string]any{
@@ -598,7 +624,7 @@ var ResultStructs = []any{
 			},
 		},
 	},
-	TestDocTagged{
+	TestTaggedStruct{
 		Time:     testTimestamp,
 		String:   "Hello World",
 		UUID:     testUUID,
@@ -608,6 +634,7 @@ var ResultStructs = []any{
 		Bytes:    []byte("Hello World"),
 		Nil:      nil,
 		GeoPoint: testLatLang,
+		Ref:      "/reference/path",
 		NestedMap: map[string]any{
 			"nestedArrayData": []any{
 				map[string]any{

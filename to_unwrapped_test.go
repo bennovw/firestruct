@@ -1,12 +1,9 @@
 package firestruct
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/bennovw/firestruct/internal/testutil"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 type UnwrappedTableTest struct {
@@ -18,82 +15,81 @@ type UnwrappedTableTest struct {
 var firestoreUnwrapTests = []UnwrappedTableTest{
 	{
 		Name:     "Firestore Time",
-		Input:    testutil.TestFirebaseDocs[0],
-		Expected: testutil.ResultFirebaseDocs[0],
+		Input:    testutil.TestFirebaseDocFields[0],
+		Expected: testutil.FlattenedMapResults[0],
 	},
 	{
 		Name:     "Firestore String",
-		Input:    testutil.TestFirebaseDocs[1],
-		Expected: testutil.ResultFirebaseDocs[1],
+		Input:    testutil.TestFirebaseDocFields[1],
+		Expected: testutil.FlattenedMapResults[1],
 	},
 	{
 		Name:     "Firestore UUID",
-		Input:    testutil.TestFirebaseDocs[2],
-		Expected: testutil.ResultFirebaseDocs[2],
+		Input:    testutil.TestFirebaseDocFields[2],
+		Expected: testutil.FlattenedMapResults[2],
 	},
 	{
 		Name:     "Firestore bool",
-		Input:    testutil.TestFirebaseDocs[3],
-		Expected: testutil.ResultFirebaseDocs[3],
+		Input:    testutil.TestFirebaseDocFields[3],
+		Expected: testutil.FlattenedMapResults[3],
 	},
 	{
 		Name:     "Firestore int",
-		Input:    testutil.TestFirebaseDocs[4],
-		Expected: testutil.ResultFirebaseDocs[4],
+		Input:    testutil.TestFirebaseDocFields[4],
+		Expected: testutil.FlattenedMapResults[4],
 	},
 	{
 		Name:     "Firestore double",
-		Input:    testutil.TestFirebaseDocs[5],
-		Expected: testutil.ResultFirebaseDocs[5],
+		Input:    testutil.TestFirebaseDocFields[5],
+		Expected: testutil.FlattenedMapResults[5],
 	},
 	{
 		Name:     "Firestore bytes",
-		Input:    testutil.TestFirebaseDocs[6],
-		Expected: testutil.ResultFirebaseDocs[6],
+		Input:    testutil.TestFirebaseDocFields[6],
+		Expected: testutil.FlattenedMapResults[6],
 	},
 	{
 		Name:     "Firestore nil",
-		Input:    testutil.TestFirebaseDocs[7],
-		Expected: testutil.ResultFirebaseDocs[7],
+		Input:    testutil.TestFirebaseDocFields[7],
+		Expected: testutil.FlattenedMapResults[7],
 	},
 	{
 		Name:     "Firestore reference",
-		Input:    testutil.TestFirebaseDocs[8],
-		Expected: testutil.ResultFirebaseDocs[8],
+		Input:    testutil.TestFirebaseDocFields[8],
+		Expected: testutil.FlattenedMapResults[8],
 	},
 	{
 		Name:     "Firestore geopoint",
-		Input:    testutil.TestFirebaseDocs[9],
-		Expected: testutil.ResultFirebaseDocs[9],
+		Input:    testutil.TestFirebaseDocFields[9],
+		Expected: testutil.FlattenedMapResults[9],
 	},
 	{
 		Name:     "Firestore Map",
-		Input:    testutil.TestFirebaseDocs[10],
-		Expected: testutil.ResultFirebaseDocs[10],
+		Input:    testutil.TestFirebaseDocFields[10],
+		Expected: testutil.FlattenedMapResults[10],
 	},
 	{
 		Name:     "Firestore Array",
-		Input:    testutil.TestFirebaseDocs[11],
-		Expected: testutil.ResultFirebaseDocs[11],
+		Input:    testutil.TestFirebaseDocFields[11],
+		Expected: testutil.FlattenedMapResults[11],
 	},
 	{
 		Name:     "Firestore Nested Fields",
-		Input:    testutil.TestFirebaseDocs[12],
-		Expected: testutil.ResultFirebaseDocs[12],
+		Input:    testutil.TestFirebaseDocFields[12],
+		Expected: testutil.FlattenedMapResults[12],
 	},
 }
 
 func TestUnwrapFirestoreFields(t *testing.T) {
+	thisFunctionName := "UnwrapFirestoreFields"
 	for _, test := range firestoreUnwrapTests {
 		t.Run(test.Name, func(t *testing.T) {
 			result, err := UnwrapFirestoreFields(test.Input)
-			if !reflect.DeepEqual(result, test.Expected) {
-				spew.Dump(result, test.Expected)
-				t.Errorf("UnwrapFirestoreFields() test \"%v\" Result: %v Want: %v", test.Name, result, test.Expected)
-			}
 			if err != nil {
-				t.Errorf("UnwrapFirestoreFields() test \"%v\" returned error: %v", test.Name, err)
+				t.Errorf("%v() test \"%v\" returned error: %v", thisFunctionName, test.Name, err)
 			}
+
+			testutil.IsDeepEqual(t, thisFunctionName, test.Name, result, test.Expected)
 		})
 	}
 
