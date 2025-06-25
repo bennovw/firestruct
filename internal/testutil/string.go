@@ -2,32 +2,27 @@ package testutil
 
 import (
 	"fmt"
-	"testing"
 )
 
 // IsStringVersionDeepEqual checks if the string representation of the result is equal to the expected result
-func IsStringVersionDeepEqual(t *testing.T, funcName string, testSectionName string, result interface{}, expected interface{}) {
-	rStr := fmt.Sprint(result)
-	eStr := fmt.Sprint(expected)
+func IsStringVersionDeepEqual(source interface{}, comparison interface{}, category string, description string) (bool, error) {
+	rStr := fmt.Sprint(source)
+	eStr := fmt.Sprint(comparison)
 
 	if rStr != eStr {
 		start, end, rDiff, eDiff := StringDiff(rStr, eStr)
 		if start == -1 {
-			// Strings are equal, no need to report
-			t.Errorf("%v() test \"%v\""+
-				"unexpected difference in string representation",
-				funcName, testSectionName)
-			return
+			return true, nil // Strings are equal
 		}
-		t.Errorf("%v() test \"%v\" Result: %q Want: %q\n"+
-			"Difference starts at index %d and ends at index %d\n"+
-			"Result: %q\n"+
-			"Expected: %q",
-			funcName, testSectionName, rStr, eStr,
+		return false, fmt.Errorf("Object values are not equal"+
+			"String representations deviate starting at index position %d and ending at index position %d of the source string\n"+
+			"Source string: %q\n"+
+			"Comparison string: %q",
+			category, description, rStr, eStr,
 			start, end,
 			rDiff, eDiff)
-		return
 	}
+	return true, nil
 }
 
 // StringDiff finds the difference between two strings and returns the start and end indices of the differing sections
