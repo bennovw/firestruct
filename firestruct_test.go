@@ -48,20 +48,20 @@ func TestFirestoreCloudEvent(t *testing.T) {
 			if err != nil {
 				t.Errorf("%v() test \"%v\" returned error: %v", thisMethodName, test.Name, err)
 			}
-			testutil.IsDeepEqual(t, thisMethodName, test.Name, result, test.Expected)
+			testutil.IsDeepEqualTest(t, result, test.Expected,thisMethodName, test.Name)
 		case "DataToTagged":
 			var result testutil.TestTaggedStruct
 			err = receivedCloudEvent.DataTo(&result)
 			if err != nil {
 				t.Errorf("%v() test \"%v\" returned error: %v", thisMethodName, test.Name, err)
 			}
-			testutil.IsDeepEqual(t, thisMethodName, test.Name, result, test.Expected)
+			testutil.IsDeepEqualTest(t, result, test.Expected,thisMethodName, test.Name)
 		case "ToMap":
 			result, err := receivedCloudEvent.ToMap()
 			if err != nil {
 				t.Errorf("%v() test \"%v\" returned error: %v", thisMethodName, test.Name, err)
 			}
-			testutil.IsDeepEqual(t, thisMethodName, test.Name, result, test.Expected)
+			testutil.IsDeepEqualTest(t, result, test.Expected,thisMethodName, test.Name)
 		default:
 			t.Errorf("%v() test \"%v\" method not covered", thisMethodName, test.Name)
 		}

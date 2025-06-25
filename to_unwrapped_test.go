@@ -89,7 +89,7 @@ func TestUnwrapFirestoreFields(t *testing.T) {
 				t.Errorf("%v() test \"%v\" returned error: %v", thisFunctionName, test.Name, err)
 			}
 
-			testutil.IsDeepEqual(t, thisFunctionName, test.Name, result, test.Expected)
+			testutil.IsDeepEqualTest(t, result, test.Expected, thisFunctionName, test.Name)
 		})
 	}
 

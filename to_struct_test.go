@@ -77,7 +77,7 @@ func TestDataToReflectPointer(t *testing.T) {
 					t.Errorf("%v() test \"%v\" returned error: %v", thisFunctionName, test.Name, err)
 				}
 
-				testutil.IsDeepEqual(t, thisFunctionName, test.Name, result, test.Expected)
+				testutil.IsDeepEqualTest(t, result, test.Expected, thisFunctionName, test.Name)
 			case testutil.TestTaggedStruct:
 				result := testutil.TestTaggedStruct{}
 				err = dataToReflectPointer(reflect.ValueOf(&result).Elem(), unwrapped)
@@ -85,7 +85,7 @@ func TestDataToReflectPointer(t *testing.T) {
 					t.Errorf("%v() test \"%v\" returned error: %v", thisFunctionName, test.Name, err)
 				}
 
-				testutil.IsDeepEqual(t, thisFunctionName, test.Name, result, test.Expected)
+				testutil.IsDeepEqualTest(t, result, test.Expected, thisFunctionName, test.Name)
 			default:
 				t.Errorf("%v() test \"%v\" expected result data type is not covered", thisFunctionName, test.Name)
 			}

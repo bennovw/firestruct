@@ -63,22 +63,43 @@ func Diff(x, y interface{}, opts ...cmp.Option) string {
 	return cmp.Diff(x, y, opts...)
 }
 
+// IsDeepEqualTest checks if the source and comparison are deeply equal and reports any errors to the testing.T instance.
+func IsDeepEqualTest(t *testing.T, source interface{}, comparison interface{}, category string, description string) bool {
+	equal, err := IsDeepEqual(source, comparison, category, description)
+	if err != nil {
+		t.Errorf("%v() test \"%v\" output does not match expected data: %v", category, description, err)
+		return false
+	}
+	if !equal {
+		t.Errorf("%v() test \"%v\" output does not match expected data", category, description)
+	}
+	return equal
+}
+
 // IsDeepEqual performs both IsMapVersionDeepEqual and IsStringVersionDeepEqual checks
-func IsDeepEqual(t *testing.T, funcName string, testSectionName string, result interface{}, expected interface{}) {
-	IsMapVersionDeepEqual(t, funcName, testSectionName, result, expected)
-	IsStringVersionDeepEqual(t, funcName, testSectionName, result, expected)
+func IsDeepEqual(source interface{}, comparison interface{}, category string, description string) (bool, error) {
+	equal := IsMapVersionDeepEqual(source, comparison, category, description)
+	if !equal {
+		return false, nil
+	}
+
+	equal, err := IsStringVersionDeepEqual(source, comparison, category, description)
+	if err != nil {
+		return false, err
+	}
+	return equal, nil
 }
 
 // IsMapVersionDeepEqual checks if the result is equal to the expected result
-func IsMapVersionDeepEqual(t *testing.T, funcName string, testSectionName string, result interface{}, expected interface{}) {
+func IsMapVersionDeepEqual(source interface{}, comparison interface{}, category string, description string) bool {
 	// Convert to maps if not already maps
-	expectedMap := asMap(expected)
-	resultMap := asMap(result)
+	expectedMap := asMap(comparison)
+	resultMap := asMap(source)
 
 	if !reflect.DeepEqual(resultMap, expectedMap) {
-		t.Errorf("%v() test \"%v\" Result: %v Want: %v", funcName, testSectionName, result, expected)
-		return
+		return false
 	}
+	return true
 }
 
 // asMap converts a value to a map representation.
