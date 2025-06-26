@@ -277,6 +277,14 @@ func unwrapInt(intValue any) (int, error) {
 		return iv, nil
 	}
 
+	if iv, ok := intValue.(int32); ok {
+		return int(iv), nil
+	}
+
+	if iv, ok := intValue.(int64); ok {
+		return int(iv), nil
+	}
+
 	return 0, fmt.Errorf("unwrapInt error processing int value: %v", intValue)
 }
 
