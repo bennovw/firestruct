@@ -147,7 +147,6 @@ var TestFirebaseDocFields = []map[string]any{
 		"ArrayData": map[string]any{
 			"arrayValue": map[string]any{
 				"values": []any{
-
 					map[string]any{
 						"timeData": map[string]any{
 							"timestampValue": testTimestamp,
@@ -197,6 +196,36 @@ var TestFirebaseDocFields = []map[string]any{
 						"geoPointData": map[string]any{
 							"geoPointValue": latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 						},
+					},
+					map[string]any{
+						"timestampValue": testTimestamp,
+					},
+					map[string]any{
+						"stringValue": "Hello World",
+					},
+					map[string]any{
+						"stringValue": "1f117a40-8bdb-4e8a-8f24-1622fea695b1",
+					},
+					map[string]any{
+						"booleanValue": true,
+					},
+					map[string]any{
+						"integerValue": 987654321,
+					},
+					map[string]any{
+						"doubleValue": 987.123456,
+					},
+					map[string]any{
+						"bytesValue": []byte("Hello World"),
+					},
+					map[string]any{
+						"nullValue": nil,
+					},
+					map[string]any{
+						"referenceValue": "/reference/path",
+					},
+					map[string]any{
+						"geoPointValue": latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 					},
 				},
 			},
@@ -385,6 +414,36 @@ var TestFirebaseDocFields = []map[string]any{
 										"geoPointValue": latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 									},
 								},
+								map[string]any{
+									"timestampValue": testTimestamp,
+								},
+								map[string]any{
+									"stringValue": "Hello World",
+								},
+								map[string]any{
+									"stringValue": "1f117a40-8bdb-4e8a-8f24-1622fea695b1",
+								},
+								map[string]any{
+									"booleanValue": true,
+								},
+								map[string]any{
+									"integerValue": 987654321,
+								},
+								map[string]any{
+									"doubleValue": 987.123456,
+								},
+								map[string]any{
+									"bytesValue": []byte("Hello World"),
+								},
+								map[string]any{
+									"nullValue": nil,
+								},
+								map[string]any{
+									"referenceValue": "/reference/path",
+								},
+								map[string]any{
+									"geoPointValue": latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
+								},
 							},
 						},
 					},
@@ -469,9 +528,18 @@ var FlattenedMapResults = []map[string]any{
 			map[string]any{
 				"geoPointData": latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 			},
+			testTimestamp,
+			"Hello World",
+			"1f117a40-8bdb-4e8a-8f24-1622fea695b1",
+			true,
+			987654321,
+			987.123456,
+			[]byte("Hello World"),
+			nil,
+			"/reference/path",
+			latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 		},
 	},
-
 	{
 		"timeData":      testTimestamp,
 		"stringData":    "Hello World",
@@ -541,6 +609,16 @@ var FlattenedMapResults = []map[string]any{
 				map[string]any{
 					"geoPointData": latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 				},
+				testTimestamp,
+				"Hello World",
+				"1f117a40-8bdb-4e8a-8f24-1622fea695b1",
+				true,
+				987654321,
+				987.123456,
+				[]byte("Hello World"),
+				nil,
+				"/reference/path",
+				latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 			},
 		},
 	},
@@ -621,6 +699,16 @@ var StructResults = []any{
 				map[string]any{
 					"geoPointData": latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 				},
+				testTimestamp,
+				"Hello World",
+				"1f117a40-8bdb-4e8a-8f24-1622fea695b1",
+				true,
+				987654321,
+				987.123456,
+				[]byte("Hello World"),
+				nil,
+				"/reference/path",
+				latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 			},
 		},
 	},
@@ -694,6 +782,16 @@ var StructResults = []any{
 				map[string]any{
 					"geoPointData": latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 				},
+				testTimestamp,
+				"Hello World",
+				"1f117a40-8bdb-4e8a-8f24-1622fea695b1",
+				true,
+				987654321,
+				987.123456,
+				[]byte("Hello World"),
+				nil,
+				"/reference/path",
+				latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 			},
 		},
 	},

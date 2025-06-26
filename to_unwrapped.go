@@ -71,8 +71,8 @@ func UnwrapFirestoreFields(input map[string]any) (map[string]any, error) {
 	mapType := reflect.TypeOf(emptyMap)
 
 	for k, val := range input {
+		// The value must be a map[string]interface{} to be valid Firestore protojson data
 		vType := reflect.TypeOf(val)
-
 		if vType != mapType {
 			return nil, fmt.Errorf("invalid input, expecting *map[string]any, but received %T", val)
 		}
@@ -141,8 +141,11 @@ func UnwrapFirestoreFields(input map[string]any) (map[string]any, error) {
 // unwrapFlatValue unwraps shallow Firestore data types (i.e. those without nested data structures)
 func unwrapFlatValue(value any) (any, error) {
 	mapValue, ok := value.(map[string]interface{})
-	if !ok || len(mapValue) != 1 {
-		return nil, fmt.Errorf("unwrapFlatValue error processing unsupported value: %v", value)
+	if !ok {
+		// If the value is not a map, it is not wrapped by a type descriptor tag and we canb return it directly
+		return value, nil
+	} else if len(mapValue) != 1 {
+		return nil, fmt.Errorf("unwrapFlatValue error processing empty map value: %v", value)
 	}
 
 	// Check if the value in the payload is encoded, starting with bytes
@@ -239,11 +242,35 @@ func unwrapArray(array any) ([]any, error) {
 			return nil, fmt.Errorf("unwrapArray error, array can only contain values encoded as map[string]interface{}")
 		}
 
+		// If the array value contains only a single map key, and it matches the tag for a flat data type, we can unwrap it directly
+		isFlatDataType := false
+		if len(mapVal) == 1 {
+			for _, key := range FirestoreFlatDataTypes {
+				if _, ok := mapVal[key]; ok {
+					isFlatDataType = true
+
+					// Extract the flat value from the protojson map
+					x, err := unwrapFlatValue(mapVal)
+					if err != nil {
+						return nil, fmt.Errorf("unwrapArray error unwrapping flat value: %v", err)
+					}
+					outputArray[i] = x
+					break
+				}
+			}
+			if isFlatDataType {
+				continue
+			}
+		}
+
+		// Recursively unwrap arrays and maps containing nested data structures inside this array element
 		output, err := UnwrapFirestoreFields(mapVal)
 		if err != nil {
 			return nil, err
 		}
 		outputArray[i] = output
+
+		continue
 	}
 
 	return outputArray, nil
