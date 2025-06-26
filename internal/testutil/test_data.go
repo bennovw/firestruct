@@ -59,7 +59,7 @@ var TestFirebaseDocs = []map[string]any{
 var TestFirebaseDocFields = []map[string]any{
 	{
 		"timeData": map[string]any{
-			"timestampValue": "2025-04-14T01:02:03Z",
+			"timestampValue": testTimestamp,
 		},
 	},
 	{
@@ -111,7 +111,7 @@ var TestFirebaseDocFields = []map[string]any{
 		"mapValue": map[string]any{
 			"fields": map[string]any{
 				"timeData": map[string]any{
-					"timestampValue": "2025-04-14T01:02:03Z",
+					"timestampValue": testTimestamp,
 				},
 				"stringData": map[string]any{
 					"stringValue": "Hello World",
@@ -150,7 +150,7 @@ var TestFirebaseDocFields = []map[string]any{
 
 					map[string]any{
 						"timeData": map[string]any{
-							"timestampValue": "2025-04-14T01:02:03Z",
+							"timestampValue": testTimestamp,
 						},
 					},
 					map[string]any{
@@ -206,7 +206,7 @@ var TestFirebaseDocFields = []map[string]any{
 	// it includes a nested map that contains an array containing both a map and another nested array
 	{
 		"timeData": map[string]any{
-			"timestampValue": "2025-04-14T01:02:03Z",
+			"timestampValue": testTimestamp,
 		},
 		"stringData": map[string]any{
 			"stringValue": "Hello World",
@@ -245,7 +245,7 @@ var TestFirebaseDocFields = []map[string]any{
 									"mapValue": map[string]any{
 										"fields": map[string]any{
 											"timeData": map[string]any{
-												"timestampValue": "2025-04-14T01:02:03Z",
+												"timestampValue": testTimestamp,
 											},
 											"stringData": map[string]any{
 												"stringValue": "Hello World",
@@ -283,7 +283,7 @@ var TestFirebaseDocFields = []map[string]any{
 											"values": []any{
 												map[string]any{
 													"timeData": map[string]any{
-														"timestampValue": "2025-04-14T01:02:03Z",
+														"timestampValue": testTimestamp,
 													},
 												},
 												map[string]any{
@@ -337,7 +337,7 @@ var TestFirebaseDocFields = []map[string]any{
 								},
 								map[string]any{
 									"timeData": map[string]any{
-										"timestampValue": "2025-04-14T01:02:03Z",
+										"timestampValue": testTimestamp,
 									},
 								},
 								map[string]any{
@@ -396,7 +396,7 @@ var TestFirebaseDocFields = []map[string]any{
 
 var FlattenedMapResults = []map[string]any{
 	{
-		"timeData": "2025-04-14T01:02:03Z",
+		"timeData": testTimestamp,
 	},
 	{
 		"stringData": "Hello World",
@@ -426,7 +426,7 @@ var FlattenedMapResults = []map[string]any{
 		"geoPointData": latlng.LatLng{Latitude: 51.205005708080876, Longitude: 3.225345050850536},
 	},
 	{
-		"timeData":      "2025-04-14T01:02:03Z",
+		"timeData":      testTimestamp,
 		"stringData":    "Hello World",
 		"uuidData":      "1f117a40-8bdb-4e8a-8f24-1622fea695b1",
 		"boolData":      true,
@@ -440,7 +440,7 @@ var FlattenedMapResults = []map[string]any{
 	{
 		"ArrayData": []any{
 			map[string]any{
-				"timeData": "2025-04-14T01:02:03Z",
+				"timeData": testTimestamp,
 			},
 			map[string]any{
 				"stringData": "Hello World",
@@ -473,7 +473,7 @@ var FlattenedMapResults = []map[string]any{
 	},
 
 	{
-		"timeData":      "2025-04-14T01:02:03Z",
+		"timeData":      testTimestamp,
 		"stringData":    "Hello World",
 		"uuidData":      "1f117a40-8bdb-4e8a-8f24-1622fea695b1",
 		"boolData":      true,
@@ -486,7 +486,7 @@ var FlattenedMapResults = []map[string]any{
 		"nestedMapData": map[string]any{
 			"nestedArrayData": []any{
 				map[string]any{
-					"timeData":      "2025-04-14T01:02:03Z",
+					"timeData":      testTimestamp,
 					"stringData":    "Hello World",
 					"uuidData":      "1f117a40-8bdb-4e8a-8f24-1622fea695b1",
 					"boolData":      true,
@@ -499,7 +499,7 @@ var FlattenedMapResults = []map[string]any{
 				},
 				map[string]any{
 					"subNestedArrayData": []any{
-						map[string]any{"timeData": "2025-04-14T01:02:03Z"},
+						map[string]any{"timeData": testTimestamp},
 						map[string]any{"stringData": "Hello World"},
 						map[string]any{"uuidData": "1f117a40-8bdb-4e8a-8f24-1622fea695b1"},
 						map[string]any{"boolData": true},
@@ -512,7 +512,7 @@ var FlattenedMapResults = []map[string]any{
 					},
 				},
 				map[string]any{
-					"timeData": "2025-04-14T01:02:03Z",
+					"timeData": testTimestamp,
 				},
 				map[string]any{
 					"stringData": "Hello World",
@@ -566,7 +566,7 @@ var StructResults = []any{
 			"nestedArrayData": []any{
 				map[string]any{
 
-					"timeData":      "2025-04-14T01:02:03Z",
+					"timeData":      testTimestamp,
 					"stringData":    "Hello World",
 					"uuidData":      "1f117a40-8bdb-4e8a-8f24-1622fea695b1",
 					"boolData":      true,
@@ -579,7 +579,7 @@ var StructResults = []any{
 				},
 				map[string]any{
 					"subNestedArrayData": []any{
-						map[string]any{"timeData": "2025-04-14T01:02:03Z"},
+						map[string]any{"timeData": testTimestamp},
 						map[string]any{"stringData": "Hello World"},
 						map[string]any{"uuidData": "1f117a40-8bdb-4e8a-8f24-1622fea695b1"},
 						map[string]any{"boolData": true},
@@ -592,7 +592,7 @@ var StructResults = []any{
 					},
 				},
 				map[string]any{
-					"timeData": "2025-04-14T01:02:03Z",
+					"timeData": testTimestamp,
 				},
 				map[string]any{
 					"stringData": "Hello World",
@@ -639,7 +639,7 @@ var StructResults = []any{
 			"nestedArrayData": []any{
 				map[string]any{
 
-					"timeData":      "2025-04-14T01:02:03Z",
+					"timeData":      testTimestamp,
 					"stringData":    "Hello World",
 					"uuidData":      "1f117a40-8bdb-4e8a-8f24-1622fea695b1",
 					"boolData":      true,
@@ -652,7 +652,7 @@ var StructResults = []any{
 				},
 				map[string]any{
 					"subNestedArrayData": []any{
-						map[string]any{"timeData": "2025-04-14T01:02:03Z"},
+						map[string]any{"timeData": testTimestamp},
 						map[string]any{"stringData": "Hello World"},
 						map[string]any{"uuidData": "1f117a40-8bdb-4e8a-8f24-1622fea695b1"},
 						map[string]any{"boolData": true},
@@ -665,7 +665,7 @@ var StructResults = []any{
 					},
 				},
 				map[string]any{
-					"timeData": "2025-04-14T01:02:03Z",
+					"timeData": testTimestamp,
 				},
 				map[string]any{
 					"stringData": "Hello World",
