@@ -78,15 +78,16 @@ func IsDeepEqualTest(t *testing.T, source interface{}, comparison interface{}, c
 
 // IsDeepEqual performs both IsMapVersionDeepEqual and IsStringVersionDeepEqual checks
 func IsDeepEqual(source interface{}, comparison interface{}, category string, description string) (bool, error) {
-	equal := IsMapVersionDeepEqual(source, comparison, category, description)
+	equal, err := IsStringVersionDeepEqual(source, comparison, category, description)
+	if err != nil || !equal {
+		return false, err
+	}
+
+	equal = IsMapVersionDeepEqual(source, comparison, category, description)
 	if !equal {
 		return false, nil
 	}
 
-	equal, err := IsStringVersionDeepEqual(source, comparison, category, description)
-	if err != nil {
-		return false, err
-	}
 	return equal, nil
 }
 

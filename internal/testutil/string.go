@@ -14,11 +14,9 @@ func IsStringVersionDeepEqual(source interface{}, comparison interface{}, catego
 		if start == -1 {
 			return true, nil // Strings are equal
 		}
-		return false, fmt.Errorf("Object values are not equal"+
-			"String representations deviate starting at index position %d and ending at index position %d of the source string\n"+
+		return false, fmt.Errorf("object values deviate starting at index position %d and ending at index position %d of the source string\n"+
 			"Source string: %q\n"+
 			"Comparison string: %q",
-			category, description, rStr, eStr,
 			start, end,
 			rDiff, eDiff)
 	}
