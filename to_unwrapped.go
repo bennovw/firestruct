@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"time"
 
 	"google.golang.org/genproto/googleapis/type/latlng"
 )
@@ -56,7 +57,6 @@ var FirestoreSimpleDataTypes = []string{
 	protoStringTag,
 	protoBoolTag,
 	protoReferenceTag,
-	protoTimestampTag,
 	protoNullTag,
 }
 
@@ -163,6 +163,11 @@ func unwrapFlatValue(value any) (any, error) {
 	// Ensure geopoint values are converted from map[string]interface{} to GeoPoint
 	if geoPointValue, ok := mapValue[protoGeoPointTag]; ok {
 		return unwrapGeoPoint(geoPointValue)
+	}
+
+	// Ensure timestamp values are converted from map[string]interface{} to time.Time
+	if timestampValue, ok := mapValue[protoTimestampTag]; ok {
+		return unwrapTimestamp(timestampValue)
 	}
 
 	for _, key := range FirestoreSimpleDataTypes {
@@ -279,7 +284,7 @@ func unwrapInt(intValue any) (int, error) {
 
 		return decoded, nil
 	}
-	
+
 	if iv, ok := intValue.(float32); ok {
 		return int(iv), nil
 	}
@@ -363,4 +368,30 @@ func unwrapGeoPoint(geoPointValue any) (latlng.LatLng, error) {
 	}
 
 	return latlng.LatLng{Latitude: lat, Longitude: lng}, nil
+}
+
+// unwrapTimestamp converts timestamp values from map[string]interface{} to time.Time
+func unwrapTimestamp(timestampValue any) (time.Time, error) {
+	if timestampValue == nil {
+		return time.Time{}, nil
+	}
+
+	// check if the timestampValue is already a time.Time type, if so, return it directly
+	if ts, ok := timestampValue.(time.Time); ok {
+		return ts, nil
+	}
+
+	// we allow timestamp values to be encoded as a string in RFC3339 format, otherwise it is considered invalid
+	t, ok := timestampValue.(string)
+	if !ok {
+		return time.Time{}, fmt.Errorf("unwrapTimestamp error processing timestamp value: %v", timestampValue)
+	}
+
+	// Parse the Firestore timestamp string into a time.Time object
+	parsedTime, err := time.Parse(time.RFC3339, t)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("unwrapTimestamp error parsing timestamp string: %v", err)
+	}
+
+	return parsedTime, nil
 }

@@ -91,19 +91,23 @@ func dataToReflectPointer(p reflect.Value, data any) error {
 		}
 
 	case typeOfGoTime:
-		x, ok := data.(string)
-		if !ok {
+		switch x := data.(type) {
+		case time.Time:
+			p.Set(reflect.ValueOf(x))
+			return nil
+
+		case string:
+			ts, err := time.Parse(time.RFC3339, x)
+			if err != nil {
+				return typeErr()
+			}
+
+			p.Set(reflect.ValueOf(ts))
+			return nil
+
+		default:
 			return typeErr()
 		}
-
-		ts, err := time.Parse(time.RFC3339, x)
-		if err != nil {
-			return typeErr()
-		}
-
-		p.Set(reflect.ValueOf(ts))
-		return nil
-
 	case typeOfLatLng:
 		switch x := data.(type) {
 		case latlng.LatLng:
