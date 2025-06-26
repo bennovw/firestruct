@@ -218,7 +218,7 @@ var TestFirebaseDocFields = []map[string]any{
 			"booleanValue": true,
 		},
 		"intData": map[string]any{
-			"integerValue": 987654321,
+			"integerValue": "987654321",
 		},
 		"doubleData": map[string]any{
 			"doubleValue": 987.123456,
