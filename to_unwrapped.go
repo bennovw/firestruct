@@ -269,6 +269,9 @@ func unwrapBytes(bytesValue any) ([]byte, error) {
 
 // unwrapInt converts integer values from float64
 func unwrapInt(intValue any) (int, error) {
+	if iv, ok := intValue.(float32); ok {
+		return int(iv), nil
+	}
 	if iv, ok := intValue.(float64); ok {
 		return int(iv), nil
 	}
@@ -294,8 +297,20 @@ func unwrapDouble(doubleValue any) (float64, error) {
 		return dv, nil
 	}
 
+	if dv, ok := doubleValue.(float32); ok {
+		return float64(dv), nil
+	}
+
 	if dv, ok := doubleValue.(int); ok {
 		return float64(dv), nil
+	}
+
+	if iv, ok := doubleValue.(int32); ok {
+		return float64(iv), nil
+	}
+
+	if iv, ok := doubleValue.(int64); ok {
+		return float64(iv), nil
 	}
 
 	return 0, fmt.Errorf("unwrapDouble error processing double value: %v", doubleValue)
