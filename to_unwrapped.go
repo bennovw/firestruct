@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"google.golang.org/genproto/googleapis/type/latlng"
 )
@@ -269,6 +270,16 @@ func unwrapBytes(bytesValue any) ([]byte, error) {
 
 // unwrapInt converts integer values from float64
 func unwrapInt(intValue any) (int, error) {
+	if iv, ok := intValue.(string); ok {
+		// If the intValue is encoded as a string, we try to convert it to an int
+		decoded, err := strconv.Atoi(iv)
+		if err != nil {
+			return 0, fmt.Errorf("unwrapInt error converting string to int: %v", iv)
+		}
+
+		return decoded, nil
+	}
+	
 	if iv, ok := intValue.(float32); ok {
 		return int(iv), nil
 	}
@@ -311,6 +322,15 @@ func unwrapDouble(doubleValue any) (float64, error) {
 
 	if iv, ok := doubleValue.(int64); ok {
 		return float64(iv), nil
+	}
+
+	// If the doubleValue is encoded as a string, we try to convert it to a float64
+	if dv, ok := doubleValue.(string); ok {
+		decoded, err := strconv.ParseFloat(dv, 64)
+		if err != nil {
+			return 0, fmt.Errorf("unwrapDouble error converting string to float64: %v", dv)
+		}
+		return decoded, nil
 	}
 
 	return 0, fmt.Errorf("unwrapDouble error processing double value: %v", doubleValue)
