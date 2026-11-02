@@ -184,9 +184,11 @@ func dataToReflectPointer(p reflect.Value, data any) error {
 		}
 		p.SetInt(i)
 
-	case reflect.Uint8, reflect.Uint16, reflect.Uint32:
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		var u uint64
 		switch x := data.(type) {
+		case uint:
+			u = uint64(x)
 		case uint8:
 			u = uint64(x)
 		case uint16:
@@ -195,6 +197,13 @@ func dataToReflectPointer(p reflect.Value, data any) error {
 			u = uint64(x)
 		case uint64:
 			u = x
+		case int, int8, int16, int32, int64:
+			// Firestore integers are signed, so accept non-negative signed values
+			i := reflect.ValueOf(x).Int()
+			if i < 0 {
+				return overflowErr(p, data)
+			}
+			u = uint64(i)
 		default:
 			return typeErr()
 		}
