@@ -227,6 +227,10 @@ func dataToReflectPointer(p reflect.Value, data any) error {
 			f = float64(x)
 		case float64:
 			f = x
+		case int, int8, int16, int32, int64:
+			f = float64(reflect.ValueOf(x).Int())
+		case uint, uint8, uint16, uint32, uint64:
+			f = float64(reflect.ValueOf(x).Uint())
 		default:
 			return typeErr()
 		}
