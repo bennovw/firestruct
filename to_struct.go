@@ -23,6 +23,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"time"
 
@@ -173,6 +174,12 @@ func dataToReflectPointer(p reflect.Value, data any) error {
 			i = int64(x)
 		case int64:
 			i = x
+		case uint, uint8, uint16, uint32, uint64:
+			u := reflect.ValueOf(x).Uint()
+			if u > math.MaxInt64 {
+				return overflowErr(p, data)
+			}
+			i = int64(u)
 		case float64:
 			i = int64(x)
 		default:
