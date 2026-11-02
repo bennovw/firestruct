@@ -184,9 +184,11 @@ func dataToReflectPointer(p reflect.Value, data any) error {
 		}
 		p.SetInt(i)
 
-	case reflect.Uint8, reflect.Uint16, reflect.Uint32:
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		var u uint64
 		switch x := data.(type) {
+		case uint:
+			u = uint64(x)
 		case uint8:
 			u = uint64(x)
 		case uint16:
