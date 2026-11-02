@@ -316,83 +316,60 @@ func TestReverseString(t *testing.T) {
 
 func TestIsStringVersionDeepEqual(t *testing.T) {
 	tests := []struct {
-		name            string
-		funcName        string
-		testSectionName string
-		result          interface{}
-		expected        interface{}
-		shouldFail      bool
+		name       string
+		result     interface{}
+		expected   interface{}
+		shouldFail bool
 	}{
 		{
-			name:            "identical integers",
-			funcName:        "TestFunc",
-			testSectionName: "basic test",
-			result:          42,
-			expected:        42,
-			shouldFail:      false,
+			name:       "identical integers",
+			result:     42,
+			expected:   42,
+			shouldFail: false,
 		},
 		{
-			name:            "identical strings",
-			funcName:        "TestFunc",
-			testSectionName: "string test",
-			result:          "hello",
-			expected:        "hello",
-			shouldFail:      false,
+			name:       "identical strings",
+			result:     "hello",
+			expected:   "hello",
+			shouldFail: false,
 		},
 		{
-			name:            "different integers",
-			funcName:        "TestFunc",
-			testSectionName: "integer test",
-			result:          42,
-			expected:        43,
-			shouldFail:      true,
+			name:       "different integers",
+			result:     42,
+			expected:   43,
+			shouldFail: true,
 		},
 		{
-			name:            "different strings",
-			funcName:        "TestFunc",
-			testSectionName: "string difference",
-			result:          "hello",
-			expected:        "world",
-			shouldFail:      true,
+			name:       "different strings",
+			result:     "hello",
+			expected:   "world",
+			shouldFail: true,
 		},
 		{
-			name:            "different types same string representation",
-			funcName:        "TestFunc",
-			testSectionName: "type test",
-			result:          42,
-			expected:        "42",
-			shouldFail:      false,
+			name:       "different types same string representation",
+			result:     42,
+			expected:   "42",
+			shouldFail: false,
 		},
 		{
-			name:            "slice comparison",
-			funcName:        "TestFunc",
-			testSectionName: "slice test",
-			result:          []int{1, 2, 3},
-			expected:        []int{1, 2, 3},
-			shouldFail:      false,
+			name:       "slice comparison",
+			result:     []int{1, 2, 3},
+			expected:   []int{1, 2, 3},
+			shouldFail: false,
 		},
 		{
-			name:            "different slice comparison",
-			funcName:        "TestFunc",
-			testSectionName: "slice difference",
-			result:          []int{1, 2, 3},
-			expected:        []int{1, 2, 4},
-			shouldFail:      true,
+			name:       "different slice comparison",
+			result:     []int{1, 2, 3},
+			expected:   []int{1, 2, 4},
+			shouldFail: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create a mock testing.T to capture errors
-			mockT := &mockTestingT{}
-
-			testIsStringVersionDeepEqual(mockT, tt.funcName, tt.testSectionName, tt.result, tt.expected)
-
-			if tt.shouldFail && !mockT.errorCalled {
-				t.Errorf("Expected test to fail but it passed")
-			}
-			if !tt.shouldFail && mockT.errorCalled {
-				t.Errorf("Expected test to pass but it failed with: %s", mockT.errorMessage)
+			equal, err := IsStringVersionDeepEqual(tt.result, tt.expected)
+			if failed := err != nil || !equal; failed != tt.shouldFail {
+				t.Errorf("IsStringVersionDeepEqual(%v, %v) = %v, %v; want failure: %v", tt.result, tt.expected, equal, err, tt.shouldFail)
 			}
 		})
 	}
@@ -411,144 +388,63 @@ func (m *mockTestingT) Errorf(format string, args ...interface{}) {
 
 func (m *mockTestingT) Helper() {}
 
-// testingTInterface defines the interface we need for testing
-type testingTInterface interface {
-	Errorf(format string, args ...interface{})
-}
-
-// testIsStringVersionDeepEqual is a wrapper that accepts our interface
-func testIsStringVersionDeepEqual(t testingTInterface, funcName string, testSectionName string, result interface{}, expected interface{}) {
-	rStr := fmt.Sprint(result)
-	eStr := fmt.Sprint(expected)
-
-	if rStr != eStr {
-		start, end, rDiff, eDiff := StringDiff(rStr, eStr)
-		if start == -1 {
-			// Strings are equal, no need to report
-			t.Errorf("%v() test \"%v\""+
-				"unexpected difference in string representation",
-				funcName, testSectionName)
-			return
-		}
-		t.Errorf("%v() test \"%v\" Result: %q Want: %q\n"+
-			"Difference starts at index %d and ends at index %d\n"+
-			"Result: %q\n"+
-			"Expected: %q",
-			funcName, testSectionName, rStr, eStr,
-			start, end,
-			rDiff, eDiff)
-		return
+// TestIsDeepEqualTest checks that IsDeepEqualTest reports failures with the category and description
+func TestIsDeepEqualTest(t *testing.T) {
+	type person struct {
+		Name string
+		Age  int
 	}
-}
 
-// TestIsStringVersionDeepEqualDirect tests the actual IsStringVersionDeepEqual function through behavior
-func TestIsStringVersionDeepEqualBehavior(t *testing.T) {
 	tests := []struct {
-		name            string
-		funcName        string
-		testSectionName string
-		result          interface{}
-		expected        interface{}
-		shouldPass      bool
-		description     string
+		name       string
+		result     interface{}
+		expected   interface{}
+		shouldPass bool
 	}{
 		{
-			name:            "identical_integers",
-			funcName:        "TestFunc",
-			testSectionName: "integer equality",
-			result:          42,
-			expected:        42,
-			shouldPass:      true,
-			description:     "identical integers should pass without calling Errorf",
+			name:       "identical structs",
+			result:     person{"John", 30},
+			expected:   person{"John", 30},
+			shouldPass: true,
 		},
 		{
-			name:            "different_integers",
-			funcName:        "TestFunc",
-			testSectionName: "integer difference",
-			result:          42,
-			expected:        100,
-			shouldPass:      false,
-			description:     "different integers should call Errorf with difference details",
+			name:       "different structs",
+			result:     person{"John", 30},
+			expected:   person{"Jane", 25},
+			shouldPass: false,
 		},
 		{
-			name:            "same_string_representation",
-			funcName:        "TestFunc",
-			testSectionName: "type conversion",
-			result:          123,
-			expected:        "123",
-			shouldPass:      true,
-			description:     "same string representation should pass",
+			name:       "different integers",
+			result:     42,
+			expected:   100,
+			shouldPass: false,
 		},
 		{
-			name:            "complex_structures",
-			funcName:        "TestFunc",
-			testSectionName: "struct test",
-			result: struct {
-				Name string
-				Age  int
-			}{"John", 30},
-			expected: struct {
-				Name string
-				Age  int
-			}{"John", 30},
-			shouldPass:  true,
-			description: "identical structs should pass",
-		},
-		{
-			name:            "different_structures",
-			funcName:        "TestFunc",
-			testSectionName: "struct difference",
-			result: struct {
-				Name string
-				Age  int
-			}{"John", 30},
-			expected: struct {
-				Name string
-				Age  int
-			}{"Jane", 25},
-			shouldPass:  false,
-			description: "different structs should fail with detailed error",
-		},
-		{
-			name:            "empty_vs_non_empty",
-			funcName:        "TestFunc",
-			testSectionName: "empty test",
-			result:          "",
-			expected:        "hello",
-			shouldPass:      false,
-			description:     "empty vs non-empty string should fail",
+			name:       "same string representation, different map values",
+			result:     map[string]interface{}{"a": 1},
+			expected:   map[string]interface{}{"a": "1"},
+			shouldPass: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create a mock that implements the same interface as testing.T
 			mockT := &mockTestingT{}
 
-			// Use reflection or type assertion to call IsStringVersionDeepEqual
-			// Since we can't directly pass mockT, we'll test the behavior indirectly
-			// by using the wrapper function that calls the same logic
-			testIsStringVersionDeepEqual(mockT, tt.funcName, tt.testSectionName, tt.result, tt.expected)
+			got := IsDeepEqualTest(mockT, tt.result, tt.expected, "TestFunc", tt.name)
 
-			// Verify the behavior matches expectations
+			if got != tt.shouldPass {
+				t.Errorf("IsDeepEqualTest() = %v, want %v", got, tt.shouldPass)
+			}
 			if tt.shouldPass && mockT.errorCalled {
-				t.Errorf("Test %q (%s): Expected to pass but Errorf was called with: %s",
-					tt.name, tt.description, mockT.errorMessage)
+				t.Errorf("Expected to pass but Errorf was called with: %s", mockT.errorMessage)
 			}
 			if !tt.shouldPass && !mockT.errorCalled {
-				t.Errorf("Test %q (%s): Expected to fail but Errorf was not called",
-					tt.name, tt.description)
+				t.Errorf("Expected to fail but Errorf was not called")
 			}
-
-			// For failing tests, verify the error message contains expected information
-			if !tt.shouldPass && mockT.errorCalled {
-				if !strings.Contains(mockT.errorMessage, tt.funcName) {
-					t.Errorf("Error message should contain function name %q, got: %s",
-						tt.funcName, mockT.errorMessage)
-				}
-				if !strings.Contains(mockT.errorMessage, tt.testSectionName) {
-					t.Errorf("Error message should contain test section name %q, got: %s",
-						tt.testSectionName, mockT.errorMessage)
+			if mockT.errorCalled {
+				if !strings.Contains(mockT.errorMessage, "TestFunc") || !strings.Contains(mockT.errorMessage, tt.name) {
+					t.Errorf("Error message should contain category and description, got: %s", mockT.errorMessage)
 				}
 			}
 		})

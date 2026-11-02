@@ -18,7 +18,6 @@ import (
 	"math"
 	"math/big"
 	"reflect"
-	"testing"
 
 	"github.com/fatih/structs"
 	"github.com/golang/protobuf/proto"
@@ -63,44 +62,40 @@ func Diff(x, y interface{}, opts ...cmp.Option) string {
 	return cmp.Diff(x, y, opts...)
 }
 
-// IsDeepEqualTest checks if the source and comparison are deeply equal and reports any errors to the testing.T instance.
-func IsDeepEqualTest(t *testing.T, source interface{}, comparison interface{}, category string, description string) bool {
-	equal, err := IsDeepEqual(source, comparison, category, description)
+// TestReporter is the subset of testing.TB used by IsDeepEqualTest. *testing.T satisfies it.
+type TestReporter interface {
+	Helper()
+	Errorf(format string, args ...interface{})
+}
+
+// IsDeepEqualTest checks if the source and comparison are deeply equal and reports any errors to the TestReporter.
+func IsDeepEqualTest(t TestReporter, source interface{}, comparison interface{}, category string, description string) bool {
+	t.Helper()
+	equal, err := IsDeepEqual(source, comparison)
 	if err != nil {
 		t.Errorf("%v() test \"%v\" output does not match expected data: %v", category, description, err)
 		return false
 	}
 	if !equal {
-		t.Errorf("%v() test \"%v\" output does not match expected data", category, description)
+		t.Errorf("%v() test \"%v\" output does not match expected data (-source +comparison):\n%s",
+			category, description, Diff(asMap(source), asMap(comparison)))
 	}
 	return equal
 }
 
 // IsDeepEqual performs both IsMapVersionDeepEqual and IsStringVersionDeepEqual checks
-func IsDeepEqual(source interface{}, comparison interface{}, category string, description string) (bool, error) {
-	equal, err := IsStringVersionDeepEqual(source, comparison, category, description)
+func IsDeepEqual(source interface{}, comparison interface{}) (bool, error) {
+	equal, err := IsStringVersionDeepEqual(source, comparison)
 	if err != nil || !equal {
 		return false, err
 	}
 
-	equal = IsMapVersionDeepEqual(source, comparison, category, description)
-	if !equal {
-		return false, nil
-	}
-
-	return equal, nil
+	return IsMapVersionDeepEqual(source, comparison), nil
 }
 
-// IsMapVersionDeepEqual checks if the result is equal to the expected result
-func IsMapVersionDeepEqual(source interface{}, comparison interface{}, category string, description string) bool {
-	// Convert to maps if not already maps
-	expectedMap := asMap(comparison)
-	resultMap := asMap(source)
-
-	if !reflect.DeepEqual(resultMap, expectedMap) {
-		return false
-	}
-	return true
+// IsMapVersionDeepEqual checks if the map representations of source and comparison are deeply equal
+func IsMapVersionDeepEqual(source interface{}, comparison interface{}) bool {
+	return reflect.DeepEqual(asMap(source), asMap(comparison))
 }
 
 // asMap converts a value to a map representation.
