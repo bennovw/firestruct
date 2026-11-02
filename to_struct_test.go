@@ -164,7 +164,7 @@ func TestDataToReflectPointerTypes(t *testing.T) {
 		{name: "uint32 from uint32", target: new(uint32), data: uint32(32), want: uint32(32)},
 		{name: "uint32 from uint64", target: new(uint32), data: uint64(64), want: uint32(64)},
 		{name: "uint8 overflow", target: new(uint8), data: uint16(300), wantErr: true},
-		{name: "uint8 from int", target: new(uint8), data: 1, wantErr: true},
+		{name: "uint8 from int", target: new(uint8), data: 1, want: uint8(1)},
 
 		// floats
 		{name: "float64 from float64", target: new(float64), data: 1.25, want: 1.25},
