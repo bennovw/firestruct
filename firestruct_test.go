@@ -67,3 +67,65 @@ func TestFirestoreCloudEvent(t *testing.T) {
 		}
 	}
 }
+
+func TestFirestoreCloudEventDocument(t *testing.T) {
+	e := FirestoreCloudEvent{Value: FirestoreDocument{Name: "doc"}}
+	if got := e.Document(); got != &e.Value {
+		t.Errorf("Document() = %p, want pointer to Value (%p)", got, &e.Value)
+	}
+}
+
+func TestDataToErrors(t *testing.T) {
+	var nilPtr *struct{}
+	tests := []struct {
+		name   string
+		target any
+	}{
+		{name: "nil", target: nil},
+		{name: "non-pointer", target: struct{}{}},
+		{name: "nil pointer", target: nilPtr},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := DataTo(tt.target, map[string]any{}); err == nil {
+				t.Errorf("DataTo(%v) = nil, want error", tt.target)
+			}
+		})
+	}
+}
+
+func TestDataToMap(t *testing.T) {
+	data := map[string]any{"a": 1}
+	got := map[string]any{}
+	if err := DataTo(&got, data); err != nil {
+		t.Fatalf("DataTo() returned error: %v", err)
+	}
+	if got["a"] != 1 {
+		t.Errorf("DataTo() = %v, want %v", got, data)
+	}
+}
+
+func TestFirestoreDocumentErrors(t *testing.T) {
+	var nilDoc *FirestoreDocument
+	if _, err := nilDoc.ToMap(); err == nil {
+		t.Error("ToMap() on nil document = nil error, want error")
+	}
+
+	invalid := FirestoreDocument{Fields: map[string]any{"a": "not wrapped"}}
+	if _, err := invalid.ToMap(); err == nil {
+		t.Error("ToMap() with invalid fields = nil error, want error")
+	}
+	var target struct{ A string }
+	if err := invalid.DataTo(&target); err == nil {
+		t.Error("DataTo() with invalid fields = nil error, want error")
+	}
+
+	e := FirestoreCloudEvent{Value: invalid}
+	if _, err := e.ToMap(); err == nil {
+		t.Error("FirestoreCloudEvent.ToMap() with invalid fields = nil error, want error")
+	}
+	if err := e.DataTo(&target); err == nil {
+		t.Error("FirestoreCloudEvent.DataTo() with invalid fields = nil error, want error")
+	}
+}
