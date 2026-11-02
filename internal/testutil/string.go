@@ -5,15 +5,12 @@ import (
 )
 
 // IsStringVersionDeepEqual checks if the string representation of the result is equal to the expected result
-func IsStringVersionDeepEqual(source interface{}, comparison interface{}, category string, description string) (bool, error) {
+func IsStringVersionDeepEqual(source interface{}, comparison interface{}) (bool, error) {
 	rStr := fmt.Sprint(source)
 	eStr := fmt.Sprint(comparison)
 
 	if rStr != eStr {
 		start, end, rDiff, eDiff := StringDiff(rStr, eStr)
-		if start == -1 {
-			return true, nil // Strings are equal
-		}
 		return false, fmt.Errorf("object values deviate starting at index position %d and ending at index position %d of the source string\n"+
 			"Source string: %q\n"+
 			"Comparison string: %q",

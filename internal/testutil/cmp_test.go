@@ -249,58 +249,42 @@ func TestDiff(t *testing.T) {
 
 func TestIsDeepEqual(t *testing.T) {
 	tests := []struct {
-		name            string
-		funcName        string
-		testSectionName string
-		result          interface{}
-		expected        interface{}
-		shouldFail      bool
+		name       string
+		result     interface{}
+		expected   interface{}
+		shouldFail bool
 	}{
 		{
-			name:            "identical structs",
-			funcName:        "TestFunc",
-			testSectionName: "struct test",
-			result:          struct{ Name string }{"test"},
-			expected:        struct{ Name string }{"test"},
-			shouldFail:      false,
+			name:       "identical structs",
+			result:     struct{ Name string }{"test"},
+			expected:   struct{ Name string }{"test"},
+			shouldFail: false,
 		},
 		{
-			name:            "different structs",
-			funcName:        "TestFunc",
-			testSectionName: "struct difference",
-			result:          struct{ Name string }{"test1"},
-			expected:        struct{ Name string }{"test2"},
-			shouldFail:      true,
+			name:       "different structs",
+			result:     struct{ Name string }{"test1"},
+			expected:   struct{ Name string }{"test2"},
+			shouldFail: true,
 		},
 		{
-			name:            "identical maps",
-			funcName:        "TestFunc",
-			testSectionName: "map test",
-			result:          map[string]int{"a": 1},
-			expected:        map[string]int{"a": 1},
-			shouldFail:      false,
+			name:       "identical maps",
+			result:     map[string]int{"a": 1},
+			expected:   map[string]int{"a": 1},
+			shouldFail: false,
 		},
 		{
-			name:            "different maps",
-			funcName:        "TestFunc",
-			testSectionName: "map difference",
-			result:          map[string]int{"a": 1},
-			expected:        map[string]int{"a": 2},
-			shouldFail:      true,
+			name:       "different maps",
+			result:     map[string]int{"a": 1},
+			expected:   map[string]int{"a": 2},
+			shouldFail: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockT := &mockTestingT{}
-
-			testIsDeepEqual(mockT, tt.funcName, tt.testSectionName, tt.result, tt.expected)
-
-			if tt.shouldFail && !mockT.errorCalled {
-				t.Errorf("Expected test to fail but it passed")
-			}
-			if !tt.shouldFail && mockT.errorCalled {
-				t.Errorf("Expected test to pass but it failed with: %s", mockT.errorMessage)
+			equal, err := IsDeepEqual(tt.result, tt.expected)
+			if tt.shouldFail != (err != nil || !equal) {
+				t.Errorf("IsDeepEqual(%v, %v) = %v, %v; want failure: %v", tt.result, tt.expected, equal, err, tt.shouldFail)
 			}
 		})
 	}
@@ -313,82 +297,59 @@ func TestIsMapVersionDeepEqual(t *testing.T) {
 	}
 
 	tests := []struct {
-		name            string
-		funcName        string
-		testSectionName string
-		result          interface{}
-		expected        interface{}
-		shouldFail      bool
+		name       string
+		result     interface{}
+		expected   interface{}
+		shouldFail bool
 	}{
 		{
-			name:            "identical maps",
-			funcName:        "TestFunc",
-			testSectionName: "map test",
-			result:          map[string]int{"a": 1, "b": 2},
-			expected:        map[string]int{"a": 1, "b": 2},
-			shouldFail:      false,
+			name:       "identical maps",
+			result:     map[string]int{"a": 1, "b": 2},
+			expected:   map[string]int{"a": 1, "b": 2},
+			shouldFail: false,
 		},
 		{
-			name:            "different maps",
-			funcName:        "TestFunc",
-			testSectionName: "map difference",
-			result:          map[string]int{"a": 1, "b": 2},
-			expected:        map[string]int{"a": 1, "b": 3},
-			shouldFail:      true,
+			name:       "different maps",
+			result:     map[string]int{"a": 1, "b": 2},
+			expected:   map[string]int{"a": 1, "b": 3},
+			shouldFail: true,
 		},
 		{
-			name:            "identical structs converted to maps",
-			funcName:        "TestFunc",
-			testSectionName: "struct to map test",
-			result:          testStruct{"test", 42},
-			expected:        testStruct{"test", 42},
-			shouldFail:      false,
+			name:       "identical structs converted to maps",
+			result:     testStruct{"test", 42},
+			expected:   testStruct{"test", 42},
+			shouldFail: false,
 		},
 		{
-			name:            "different structs converted to maps",
-			funcName:        "TestFunc",
-			testSectionName: "struct to map difference",
-			result:          testStruct{"test1", 42},
-			expected:        testStruct{"test2", 42},
-			shouldFail:      true,
+			name:       "different structs converted to maps",
+			result:     testStruct{"test1", 42},
+			expected:   testStruct{"test2", 42},
+			shouldFail: true,
 		},
 		{
-			name:            "struct vs map comparison",
-			funcName:        "TestFunc",
-			testSectionName: "struct vs map",
-			result:          testStruct{"test", 42},
-			expected:        map[string]interface{}{"Name": "test", "Value": 42},
-			shouldFail:      false,
+			name:       "struct vs map comparison",
+			result:     testStruct{"test", 42},
+			expected:   map[string]interface{}{"Name": "test", "Value": 42},
+			shouldFail: false,
 		},
 		{
-			name:            "empty maps",
-			funcName:        "TestFunc",
-			testSectionName: "empty maps",
-			result:          map[string]int{},
-			expected:        map[string]int{},
-			shouldFail:      false,
+			name:       "empty maps",
+			result:     map[string]int{},
+			expected:   map[string]int{},
+			shouldFail: false,
 		},
 		{
-			name:            "nil comparison",
-			funcName:        "TestFunc",
-			testSectionName: "nil test",
-			result:          nil,
-			expected:        nil,
-			shouldFail:      false,
+			name:       "nil comparison",
+			result:     nil,
+			expected:   nil,
+			shouldFail: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockT := &mockTestingT{}
-
-			testIsMapVersionDeepEqual(mockT, tt.funcName, tt.testSectionName, tt.result, tt.expected)
-
-			if tt.shouldFail && !mockT.errorCalled {
-				t.Errorf("Expected test to fail but it passed")
-			}
-			if !tt.shouldFail && mockT.errorCalled {
-				t.Errorf("Expected test to pass but it failed with: %s", mockT.errorMessage)
+			if got := IsMapVersionDeepEqual(tt.result, tt.expected); got == tt.shouldFail {
+				t.Errorf("IsMapVersionDeepEqual(%v, %v) = %v, want %v", tt.result, tt.expected, got, !tt.shouldFail)
 			}
 		})
 	}
@@ -584,23 +545,5 @@ func BenchmarkAsMap(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		asMap(s)
-	}
-}
-
-// testIsDeepEqual is a wrapper that accepts our interface
-func testIsDeepEqual(t testingTInterface, funcName string, testSectionName string, result interface{}, expected interface{}) {
-	testIsMapVersionDeepEqual(t, funcName, testSectionName, result, expected)
-	testIsStringVersionDeepEqual(t, funcName, testSectionName, result, expected)
-}
-
-// testIsMapVersionDeepEqual is a wrapper that accepts our interface
-func testIsMapVersionDeepEqual(t testingTInterface, funcName string, testSectionName string, result interface{}, expected interface{}) {
-	// Convert to maps if not already maps
-	expectedMap := asMap(expected)
-	resultMap := asMap(result)
-
-	if !reflect.DeepEqual(resultMap, expectedMap) {
-		t.Errorf("%v() test \"%v\" Result: %v Want: %v", funcName, testSectionName, result, expected)
-		return
 	}
 }
