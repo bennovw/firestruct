@@ -1,12 +1,12 @@
 module github.com/bennovw/firestruct
 
-go 1.21
+go 1.26.0
 
-toolchain go1.21.13
+toolchain go1.26.10
 
 require (
 	github.com/google/uuid v1.6.0
-	google.golang.org/genproto v0.0.0-20240624140628-dc46fd24d27d
+	google.golang.org/genproto v0.0.0-20261026165753-2ffab32bce7e
 )
 
 require (
@@ -16,10 +16,10 @@ require (
 )
 
 require (
-	github.com/cloudevents/sdk-go/v2 v2.15.2
+	github.com/cloudevents/sdk-go/v2 v2.16.2
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/structs v1.1.0
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.7.0
-	google.golang.org/protobuf v1.36.5 // indirect
+	google.golang.org/protobuf v1.36.12 // indirect
 )
