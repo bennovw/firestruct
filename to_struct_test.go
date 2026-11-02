@@ -170,7 +170,7 @@ func TestDataToReflectPointerTypes(t *testing.T) {
 		{name: "float64 from float64", target: new(float64), data: 1.25, want: 1.25},
 		{name: "float64 from float32", target: new(float64), data: float32(1.5), want: 1.5},
 		{name: "float32 overflow", target: new(float32), data: 1e300, wantErr: true},
-		{name: "float64 from int", target: new(float64), data: 1, wantErr: true},
+		{name: "float64 from int", target: new(float64), data: 1, want: 1.0},
 
 		// slices
 		{name: "slice grows", target: new([]string), data: []any{"a", "b"}, want: []string{"a", "b"}},
